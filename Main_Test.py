@@ -84,14 +84,44 @@ def identification_passager(Nom, Prenom, DateNaissance): #testé
     base.close()
     return Id
 
+def ajout_circuit(Descriptif, Villedepart, Villearrivee, Paysdepart, Paysarrivee, Datedepart, Nbplacedisponible, Duree, Prixinscription):
+    base = connexion.cursor() #testé
+    base.execute("Select top 1 IdCircuit from Circuit order by IdCircuit Desc;")
+    ligne = base.fetchone()
+    Dernier_Id = ligne.IdCircuit + 1
+    Liste =[Dernier_Id, Descriptif, Villedepart, Villearrivee, Paysdepart, Paysarrivee, Datedepart, Nbplacedisponible, Duree, Prixinscription]
+    base.execute("insert into Circuit(IdCircuit, Descriptif, VilleDepart, VilleArrivee, PaysDepart, PaysArrivee, DateDepart, NbPlaceDisponible, Duree, PrixInscription) values (?,?,?,?,?,?,?,?,?,?);", Liste)
+    base.close()
+
+def ajout_lieu(Nomlieu, Ville, Pays, Descriptif, Prixvisite): #testé
+    #ATTENTION ! Cette fonction peut renvoyer une erreur Exception Lieu pre-exitant si le Lieu existe dans la BD
+    base = connexion.cursor() 
+    base.execute("Select NomLieu, Ville, Pays from Lieu;")
+    for ligne in base :
+        if Nomlieu == ligne.NomLieu and Ville == ligne.Ville and Pays == ligne.Pays :
+            base.close()
+            raise Exception('Lieu pre-existant')
+    
+    base.execute("insert into Lieu(NomLieu, Ville, Pays, Descriptif, PrixVisite) values (?,?,?,?,?);",[Nomlieu, Ville, Pays, Descriptif, Prixvisite])
+    base.close()
+
+def ajout_etape(IdCircuit, DateEtape, Duree, NomLieu, Ville, Pays): #testé
+    base = connexion.cursor()
+    base.execute("select top 1 Ordre from Etape where IdCircuit = ? order by Ordre Desc;", [IdCircuit])
+    ligne = base.fetchone()
+    if ligne is None:
+        Dernier_Id = 1
+    else:
+        Dernier_Id = ligne.Ordre + 1
+    base.execute("insert into Etape(IdCircuit, Ordre, DateEtape, Duree, NomLieu, Ville, Pays) values(?,?,?,?,?,?,?);",[IdCircuit, Dernier_Id, DateEtape, Duree, NomLieu, Ville, Pays])
+    base.close()
 
 def test_ajout():
-    trouve = identification_passager("Muliez","Pierre", "1950-08-28")
-    print(trouve)
-    trouve = identification_passager("Miliez","Michelle", "28/08/1965")
+    ajout_lieu("Catédrale St Pierre", "Narbone", "France", "Une ville église en pierre", 12.3)
+    ajout_etape(7, "2021-02-20", 5,"Catédrale St Pierre", "Narbone", "France")
+    ajout_etape(7, "2021-02-22", 18,"Catédrale St Pierre", "Narbone", "France")
     base = connexion.cursor()
-    print(trouve)
-    base.execute("select * from Passager, Personne where Passager.IdPersonne = Personne.IdPersonne;")
+    base.execute("select * from Etape;")
     for ligne in base:
         for i in range(len(ligne)):
             print(ligne[i], end=' ')
