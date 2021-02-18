@@ -58,7 +58,7 @@ def ajout_reservation(Client, Circuit, Places, Date): #testé
     ligne = base.fetchone()
     Dernier_Id = ligne.IdReservation
     Dernier_Id = Dernier_Id + 1 #str peut-être nécessaire
-    base.execute("INSERT INTO Reservation (IdReservation , Place , DateRevervation , Etat  , IdCircuit, IdPersonne) VALUES (?, ?, ? , '0', ? , ? ) ; ", [Dernier_Id, Places, Date, Circuit, Client])
+    base.execute("INSERT INTO Reservation (IdReservation , Place , DateRevervation , Etat  , IdCircuit, IdPersonne) VALUES (?, ?, ? , '1', ? , ? ) ; ", [Dernier_Id, Places, Date, Circuit, Client])
     base.execute("UPDATE Circuit SET NbPlaceDisponible= NbPlaceDisponible - ? where IdCircuit=? ;",[Places, Circuit])
     base.close()
 
@@ -116,12 +116,36 @@ def ajout_etape(IdCircuit, DateEtape, Duree, NomLieu, Ville, Pays): #testé
     base.execute("insert into Etape(IdCircuit, Ordre, DateEtape, Duree, NomLieu, Ville, Pays) values(?,?,?,?,?,?,?);",[IdCircuit, Dernier_Id, DateEtape, Duree, NomLieu, Ville, Pays])
     base.close()
 
-def test_ajout():
-    ajout_lieu("Catédrale St Pierre", "Narbone", "France", "Une ville église en pierre", 12.3)
-    ajout_etape(7, "2021-02-20", 5,"Catédrale St Pierre", "Narbone", "France")
-    ajout_etape(7, "2021-02-22", 18,"Catédrale St Pierre", "Narbone", "France")
+def ajout_groupe(Idpassager, Idreservation): #testé
     base = connexion.cursor()
-    base.execute("select * from Etape;")
+    base.execute("insert into Groupe(IdPersonne, IdReservation, Confirmation) values(?,?,?);",[Idpassager, Idreservation, 0])
+    base.close()
+
+def confirmer_groupe(Idpassager, Idreservation): #testé
+    base = connexion.cursor()
+    base.execute("update Groupe set Confirmation = 1 where IdPersonne = ? and IdReservation = ?;",[Idpassager, Idreservation])
+    base.close()
+
+def annuler_groupe(Idpassager, Idreservation, date): #testé
+    base = connexion.cursor() # a améliorer : circuit regagne une place et reservation en perd une
+    base.execute("update Groupe set Confirmation = 0, DateAnnulation = ? where IdPersonne = ? and IdReservation = ?;",[date, Idpassager, Idreservation])
+    #uptade circuit via clé reservation puis clé circuit
+    #uptade reservation via clé reservation
+    base.close()
+
+def miseajour_reservation():
+    base = connexion.cursor()
+    #trouver reservation ancienne
+        # les mettre à etat 0
+    #trouver reservation annulé
+        # les mettre à etat 0
+    base.close()
+
+
+def test_ajout():
+    annuler_groupe(3,3,"2021-02-18")
+    base = connexion.cursor()
+    base.execute("select * from Groupe;")
     for ligne in base:
         for i in range(len(ligne)):
             print(ligne[i], end=' ')
