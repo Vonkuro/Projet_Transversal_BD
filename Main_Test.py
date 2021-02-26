@@ -1,5 +1,5 @@
 from Connexsion import *
-
+import datetime
 
 def verification_client(user, motsdepasse): #testé
     base = connexion.cursor()
@@ -126,31 +126,65 @@ def confirmer_groupe(Idpassager, Idreservation): #testé
     base.execute("update Groupe set Confirmation = 1 where IdPersonne = ? and IdReservation = ?;",[Idpassager, Idreservation])
     base.close()
 
-def annuler_groupe(Idpassager, Idreservation, date): #testé
-    base = connexion.cursor() # a améliorer : circuit regagne une place et reservation en perd une
+def annuler_groupe(Idpassager, Idreservation, date): #testé - testé
+    base = connexion.cursor() # a améliorer : circuit regagne une place et reservation en perd une - fait
     base.execute("update Groupe set Confirmation = 0, DateAnnulation = ? where IdPersonne = ? and IdReservation = ?;",[date, Idpassager, Idreservation])
     #uptade circuit via clé reservation puis clé circuit
+    base.execute("select top 1 Circuit.IdCircuit, Circuit.NbPlaceDisponible, Reservation.Place from Reservation inner join Circuit on Reservation.IdCircuit = Circuit.IdCircuit where IdReservation = ?",[Idreservation])
+    circuit = base.fetchone()
+    base.execute("update Circuit set NbPlaceDisponible = ? where IdCircuit = ?;", [circuit.NbPlaceDisponible + 1 , circuit.IdCircuit]) #ici
     #uptade reservation via clé reservation
+    base.execute("update Reservation set Place = ? where IdReservation = ?;", [circuit.Place - 1, Idreservation])
     base.close()
 
-def miseajour_reservation():
+def miseajour_reservation(): #en cour
     base = connexion.cursor()
-    #trouver reservation ancienne
-        # les mettre à etat 0
-    #trouver reservation annulé
+    #trouver reservation ancienne #testé
+    base.execute("select DateDepart, Duree, IdReservation from Circuit inner join (select IdCircuit, IdReservation from Reservation where Etat =1) as Reservation_active on Circuit.IdCircuit = Reservation_active.IdCircuit;")
+
+    Aujourdhuis= datetime.date.today()
+    liste_reservation_finit = []
+    for ligne in base:
+        #conversion vers datetime pour addition de datedepart et duree du circuit puis pour comparer avec aujourdhuis
+        duree_time= datetime.timedelta(days=ligne.Duree)
+        debut = conversion_datestring_dateliste(ligne.DateDepart)
+        debut_circuit = datetime.date(debut[0],debut[1],debut[2])
+        Fin_circuit = debut_circuit + duree_time
+        
+        if Fin_circuit < Aujourdhuis:
+            liste_reservation_finit.append(ligne.IdReservation)
+    # les mettre à etat 0
+    for i in range(len(liste_reservation_finit) ):
+        base.execute("update Reservation set Etat = 0 where IdReservation = ?;", [liste_reservation_finit[i]])
+
+        
+    #trouver reservation annulé en cour
         # les mettre à etat 0
     base.close()
+
+def conversion_datestring_dateliste(datestring): #testé (oui, il y eu des erreurs sur cette mini-fonction)
+    #transforme une date sous format chaine de charactère "année-mois-jour" en une liste de 3 élément : année, mois, jour
+    return [int(datestring[0:4]), int(datestring[5:7]), int(datestring[8:10])]
 
 
 def test_ajout():
-    annuler_groupe(3,3,"2021-02-18")
+
+    #print(conversion_datestring_dateliste("2020-11-03"))
     base = connexion.cursor()
-    base.execute("select * from Groupe;")
+    base.execute("select IdReservation, Etat from Reservation;")
     for ligne in base:
         for i in range(len(ligne)):
-            print(ligne[i], end=' ')
+            print(ligne[i], end=' // ')
         print('')
-    
+    print("")
+    miseajour_reservation()
+    print("")
+    base.execute("select IdReservation, Etat from Reservation;")
+    for ligne in base:
+        for i in range(len(ligne)):
+            print(ligne[i], end=' // ')
+        print('')
+
     base.close()
 
 
