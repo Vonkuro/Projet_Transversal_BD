@@ -63,6 +63,9 @@ def ajout_reservation(Client, Circuit, Places, Date): #testé
     base.close()
 
 def identification_passager(Nom, Prenom, DateNaissance): #testé
+    #Prend le Nom, Prenom et date de naissance puis s'assure que la personne existe dans la base en tant que Passager
+    #Si non, crée le Passager dans la baser
+    #Renvoit l'IdPassager
     base = connexion.cursor()
     base.execute("Select * from Personne;")
     Id = 0
@@ -93,6 +96,19 @@ def ajout_circuit(Descriptif, Villedepart, Villearrivee, Paysdepart, Paysarrivee
     base.execute("insert into Circuit(IdCircuit, Descriptif, VilleDepart, VilleArrivee, PaysDepart, PaysArrivee, DateDepart, NbPlaceDisponible, Duree, PrixInscription) values (?,?,?,?,?,?,?,?,?,?);", Liste)
     base.close()
 
+def prix_circuits(): #testé
+    base = connexion.cursor()
+    requette = "select Circuit.IdCircuit, PrixInscription + sum(Lieu.PrixVisite) as Prix_total"
+    requette += " from Circuit, Etape inner join Lieu on (Etape.Pays = Lieu.Pays and Etape.Ville = Lieu.ville and Etape.NomLieu = Lieu.NomLieu)"
+    requette += " where Circuit.IdCircuit = Etape.IdCircuit"
+    requette += " group by Circuit.IdCircuit, Circuit.PrixInscription;"
+    base.execute(requette)
+    Liste_Prix = []
+    for ligne in base:
+        Liste_Prix.append([ligne.IdCircuit, float(ligne.Prix_total)])
+    base.close()
+    return Liste_Prix
+
 def ajout_lieu(Nomlieu, Ville, Pays, Descriptif, Prixvisite): #testé
     #ATTENTION ! Cette fonction peut renvoyer une erreur Exception Lieu pre-exitant si le Lieu existe dans la BD
     base = connexion.cursor() 
@@ -105,6 +121,30 @@ def ajout_lieu(Nomlieu, Ville, Pays, Descriptif, Prixvisite): #testé
     base.execute("insert into Lieu(NomLieu, Ville, Pays, Descriptif, PrixVisite) values (?,?,?,?,?);",[Nomlieu, Ville, Pays, Descriptif, Prixvisite])
     base.close()
 
+def miseajour_lieu(): #testé
+    base = connexion.cursor()
+    Lieux_suprime = []
+    requette = "Select Lieu.NomLieu, Lieu.Ville, Lieu.Pays"
+    requette += " from Lieu"
+    requette += " where Lieu.NomLieu not in ("
+    requette += "Select Etape.NomLieu from Etape, Lieu where Etape.NomLieu = Lieu.NomLieu and  Etape.Ville = Lieu.Ville and Etape.Pays = Lieu.Pays)"
+    requette += " and Lieu.Ville not in ("
+    requette += "Select Etape.Ville from Etape, Lieu where Etape.NomLieu = Lieu.NomLieu and  Etape.Ville = Lieu.Ville and Etape.Pays = Lieu.Pays)"
+    requette += " and Lieu.Pays not in ("
+    requette += "Select Etape.Pays from Etape, Lieu where Etape.NomLieu = Lieu.NomLieu and  Etape.Ville = Lieu.Ville and Etape.Pays = Lieu.Pays);"
+    base.execute(requette)
+    for ligne in base :
+        Lieux_suprime.append([ligne.NomLieu, ligne.Ville, ligne.Pays])
+    requette = "Delete from Lieu where Lieu.NomLieu not in ("
+    requette += "Select Etape.NomLieu from Etape, Lieu where Etape.NomLieu = Lieu.NomLieu and  Etape.Ville = Lieu.Ville and Etape.Pays = Lieu.Pays)"
+    requette += " and Lieu.Ville not in ("
+    requette += "Select Etape.Ville from Etape, Lieu where Etape.NomLieu = Lieu.NomLieu and  Etape.Ville = Lieu.Ville and Etape.Pays = Lieu.Pays)"
+    requette += " and Lieu.Pays not in ("
+    requette += "Select Etape.Pays from Etape, Lieu where Etape.NomLieu = Lieu.NomLieu and  Etape.Ville = Lieu.Ville and Etape.Pays = Lieu.Pays);"
+    base.execute(requette)
+    base.close()
+    return Lieux_suprime
+
 def ajout_etape(IdCircuit, DateEtape, Duree, NomLieu, Ville, Pays): #testé
     base = connexion.cursor()
     base.execute("select top 1 Ordre from Etape where IdCircuit = ? order by Ordre Desc;", [IdCircuit])
@@ -114,6 +154,11 @@ def ajout_etape(IdCircuit, DateEtape, Duree, NomLieu, Ville, Pays): #testé
     else:
         Dernier_Id = ligne.Ordre + 1
     base.execute("insert into Etape(IdCircuit, Ordre, DateEtape, Duree, NomLieu, Ville, Pays) values(?,?,?,?,?,?,?);",[IdCircuit, Dernier_Id, DateEtape, Duree, NomLieu, Ville, Pays])
+    base.close()
+
+def suprime_etape(Idcircuit, Ordre): #testé
+    base = connexion.cursor()
+    base.execute("delete from Etape where Ordre = ? and IdCircuit = ?; Update Etape Set Ordre = Ordre - 1 where Ordre > ? and IdCircuit = ?;", [Idcircuit, Ordre, Idcircuit, Ordre])
     base.close()
 
 def ajout_groupe(Idpassager, Idreservation): #testé
@@ -137,7 +182,7 @@ def annuler_groupe(Idpassager, Idreservation, date): #testé - testé
     base.execute("update Reservation set Place = ? where IdReservation = ?;", [circuit.Place - 1, Idreservation])
     base.close()
 
-def miseajour_reservation(): #en cour
+def miseajour_reservation(): #testé
     base = connexion.cursor()
     #trouver reservation ancienne #testé
     base.execute("select DateDepart, Duree, IdReservation from Circuit inner join (select IdCircuit, IdReservation from Reservation where Etat =1) as Reservation_active on Circuit.IdCircuit = Reservation_active.IdCircuit;")
@@ -153,13 +198,17 @@ def miseajour_reservation(): #en cour
         
         if Fin_circuit < Aujourdhuis:
             liste_reservation_finit.append(ligne.IdReservation)
+    
+    #trouver reservation annulé en cour #testé
+        #aka les reservtions avec 0 places et l'état à 1 (c'est à dire reservation futur/en cour)
+    base.execute("select IdReservation from Reservation where Etat = 1 and Place = 0;")
+
+    for ligne in base:
+        liste_reservation_finit.append(ligne.IdReservation)
+
     # les mettre à etat 0
     for i in range(len(liste_reservation_finit) ):
         base.execute("update Reservation set Etat = 0 where IdReservation = ?;", [liste_reservation_finit[i]])
-
-        
-    #trouver reservation annulé en cour
-        # les mettre à etat 0
     base.close()
 
 def conversion_datestring_dateliste(datestring): #testé (oui, il y eu des erreurs sur cette mini-fonction)
@@ -170,22 +219,19 @@ def conversion_datestring_dateliste(datestring): #testé (oui, il y eu des erreu
 def test_ajout():
 
     #print(conversion_datestring_dateliste("2020-11-03"))
-    base = connexion.cursor()
-    base.execute("select IdReservation, Etat from Reservation;")
-    for ligne in base:
-        for i in range(len(ligne)):
-            print(ligne[i], end=' // ')
-        print('')
-    print("")
-    miseajour_reservation()
-    print("")
-    base.execute("select IdReservation, Etat from Reservation;")
-    for ligne in base:
-        for i in range(len(ligne)):
-            print(ligne[i], end=' // ')
-        print('')
 
-    base.close()
+    #ajout_reservation(11, 1, 0, "2022-11-05")
+
+    print (prix_circuits())
+    #base = connexion.cursor()
+
+    """
+    for ligne in base:
+        for i in range(len(ligne)):
+            print(ligne[i], end=' // ')
+        print('')
+"""
+    #base.close()
 
 
 test_ajout()
