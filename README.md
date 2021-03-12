@@ -6,11 +6,11 @@ Login :
 
 Gestion compte:
 	ajout_client fait
-	supprime_client àfaire priorité
+	supprime_client fait
 	update_client àfaire
 
 	ajout_admin fait
-	supprime_admin àfaire priorité
+	supprime_admin fait
 	update_admin àfaire
 
 Interaction client :
@@ -30,7 +30,7 @@ Administration :
 		miseajout_lieu fait
 			affiche puis supprime les lieux associés à aucune étape
 		update_lieu àfaire
-		supprime_lieu àfaire priorité
+		supprime_lieu fait
 		lire_lieu àfaire priorité
 	Etape
 		ajout_etape fait
@@ -41,15 +41,16 @@ Administration :
 		miseajour_reservation fait
 		lire_reservation àfaire priorité
 	Circuit
-		ajout_circuit àfaire priorité priorité
+		ajout_circuit fait
 		update_circuit àfaire
-		supprime_circuit àfaire priorité
+		supprime_circuit fait
 		lire_circuit àfaire priorité
 	Client
 		lire_client àfaire priorité
 	Groupe
 		lire_groupe àfaire priorité
 	
+Pour les fonctions "lire" il faut définir les informations nécéssaire à l'application
 
 Application :
 	àfaire

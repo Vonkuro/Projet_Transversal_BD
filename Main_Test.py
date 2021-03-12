@@ -215,6 +215,49 @@ def conversion_datestring_dateliste(datestring): #testé (oui, il y eu des erreu
     #transforme une date sous format chaine de charactère "année-mois-jour" en une liste de 3 élément : année, mois, jour
     return [int(datestring[0:4]), int(datestring[5:7]), int(datestring[8:10])]
 
+def supprime_client(Idclient):#testé 
+    base = connexion.cursor()
+    #vérification si client encore en reservation
+    base.execute("select IdPersonne from Reservation where IdPersonne = ?;",[Idclient])
+    ligne = base.fetchone()
+    if ligne is None:
+        base.execute("delete from Client where IdPersonne = ?;",[Idclient])
+        base.close()
+        return 1
+    else:
+        base.close()
+        return 0
+
+def supprime_admin(Idadmin): #testé 
+    base = connexion.cursor()
+    base.execute("delete from Administrateur where IdPersonne = ?;",[Idadmin])
+    base.close()
+
+def supprime_lieu(Nom, Ville, Pays): #testé 
+    base = connexion.cursor()
+    base.execute("select Ordre from Etape where NomLieu =? and Ville = ? and Pays =?;",[Nom, Ville, Pays])
+    ligne = base.fetchone()
+    if ligne is None:
+        base.execute("delete from Lieu where NomLieu =? and Ville = ? and Pays =?;",[Nom, Ville, Pays])
+        base.close()
+        return 1
+    base.close()
+    return 0
+
+def supprime_circuit(Idcircuit): #testé 
+    #ne supprime pas les reservations par lui même
+    base = connexion.cursor()
+    base.execute("select Ordre from Etape where IdCircuit = ?;",[Idcircuit])
+    ligne = base.fetchone()
+    if ligne is None:
+        base.execute("select IdReservation, Etat from Reservation where IdCircuit = ?;",[Idcircuit])
+        ligne = base.fetchone()
+        if ligne is None:
+            base.execute("delete from Circuit where IdCircuit = ?;",[Idcircuit])
+            base.close()
+            return 1
+    base.close()
+    return 0
 
 def test_ajout():
 
@@ -222,16 +265,18 @@ def test_ajout():
 
     #ajout_reservation(11, 1, 0, "2022-11-05")
 
-    print (prix_circuits())
-    #base = connexion.cursor()
+    ajout_circuit("Un tour chez les miniboys","Lille","Lille","France", "France","2022-05-24",15,2,59.87)
+    supprime_circuit(11)
 
-    """
+    base = connexion.cursor()
+
+    base.execute("select * from Circuit;")    
     for ligne in base:
         for i in range(len(ligne)):
             print(ligne[i], end=' // ')
         print('')
-"""
-    #base.close()
+
+    base.close()
 
 
 test_ajout()
