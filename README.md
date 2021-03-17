@@ -1,30 +1,51 @@
 "# Projet_Transversal_BD" 
 
+rajouter email dans BD
+
 Login :
 	verification_client fait
 	verification_admin fait
 
-Gestion compte:
-	ajout_client fait
+Création de Compte Client:
+	ajout_client fait (à modifier  + email)
+
+Choix du Circuit:
+	trouve_circuit àfaire
+		depend de date et budget
+	lire_circuit àfaire
+		les circuits touvés
+	lire_etapes àfaire
+	prix_circuit fait
+		renvois le prix des circuits
+	lire_etape àfaire
+		d'un circuit en particulier
+
+Réservation d'un circuit:
+	ajout_reservation fait
+	ajout_groupe fait
+	identification_passager fait
+		ajoute un passager à la BD
+
+Liste des reservations:
+	lire_reservation àfaire
+
+Modification d'une réservation:
+	update_passager àfaire
+	lire_passager àfaire
+	confirmer_groupe fait
+	annuler_groupe fait
+	annuler_reservation àfaire
+
+Gestion du compte client:
 	supprime_client fait
 	update_client àfaire
 
-	ajout_admin fait
-	supprime_admin fait
-	update_admin àfaire
-
-Interaction client :
-	ajout_reservation fait
-	identification_passager fait
-		ajoute un passager à la BD
-	update_passager àfaire
-	prix_circuit fait
-		renvois le prix des circuits
-	ajout_groupe fait
-	confirmer_groupe fait
-	annuler_groupe fait
-
 Administration :
+	Liste des Administrateurs:
+		ajout_admin fait (à modifier + email)
+		supprime_admin fait
+		update_admin àfaire
+		lire_admin àfaire
 	Lieu
 		ajout_lieu fait
 		miseajout_lieu fait
@@ -47,11 +68,37 @@ Administration :
 		lire_circuit àfaire priorité
 	Client
 		lire_client àfaire priorité
-	Groupe
-		lire_groupe àfaire priorité
+		supprime_client fait
+		update_client àfaire
+		ajout_client fait (à modifier  + email)
+	Passager
+		lire_passager àfaire priorité
+		miseajour_passager àfaire
+			suppression des passagers non utiliser
 	
 Pour les fonctions "lire" il faut définir les informations nécéssaire à l'application
 
 Application :
-	àfaire
-	àdéfinir
+	Login àfaire
+
+	Création de compte client àfaire
+
+	Accueil Client à faire
+	Gestion du compte client àfaire
+	Choix du Circuit àfaire
+	Reservation àfaire
+	Liste des reservertion àfaire
+	Modification d'une reservation
+
+	Accueil Admin àfaire
+	Liste des clients àfaire
+	Liste des réservation de circuit par clients àfaire
+	Liste des circuits àfaire
+	listes des clients et des passagers par circuit àfaire
+	Listes des lieux àfaire
+	Liste des étapes àfaire
+	Liste des administrateurs àfaire
+
+
+soutenance 20 avril
+dossier à rendre une semaine avant : le 15 avril
