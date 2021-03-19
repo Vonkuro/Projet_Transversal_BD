@@ -25,40 +25,38 @@ def verification_admin(user, motsdepasse): #testé
 
 def ajout_client(user, motsdepasse, nom, prenom, datenaissance, mail): #testé
     base = connexion.cursor()
+
+    demande = "insert into Personne(Nom, Prenom, DateNaissance, Mail) values ('" + nom + "', '" + prenom + "', '" + datenaissance + "', '" + mail
+    demande = demande + "');"
+    base.execute(demande)
+
     base.execute("select top 1 IdPersonne from Personne order by IdPersonne Desc")
     ligne = base.fetchone()
-    Dernier_Id = ligne.IdPersonne
-    Dernier_Id = str(Dernier_Id + 1)
-    
+    Dernier_Id = str(ligne.IdPersonne)
 
-    demande = "insert into Personne(IdPersonne, Nom, Prenom, DateNaissance, Mail) values (" + Dernier_Id + ", " + nom + ", " + prenom + ", " + datenaissance + ", " + mail
-    demande = demande + ");"
-    base.execute(demande)
-    demande = "insert into Client(IdPersonne, Identifiant, MotsdePasse) values (" + Dernier_Id + ", " + user + ", " + motsdepasse + ");"
+    demande = "insert into Client(IdPersonne, Identifiant, MotsdePasse) values ('" + Dernier_Id + "', '" + user + "', '" + motsdepasse + "');"
     base.execute(demande)
 
     base.close()
 
 def ajout_admin(user, motsdepasse, nom, prenom, datenaissance, mail): #testé
     base = connexion.cursor()
+    
+    base.execute("insert into Personne(Nom, Prenom, DateNaissance, Mail) values (?, ?, ?, ?);", [nom,prenom,datenaissance, mail])
+    
     base.execute("select top 1 IdPersonne from Personne order by IdPersonne Desc")
     ligne = base.fetchone()
     Dernier_Id = ligne.IdPersonne
-    Dernier_Id = str(Dernier_Id + 1)
-    
-    base.execute("insert into Personne(IdPersonne, Nom, Prenom, DateNaissance, Mail) values (?, ?, ?, ?, ?);", [Dernier_Id,nom,prenom,datenaissance, mail])
-    
+
     base.execute("insert into Administrateur(IdPersonne, Identifiant, MotsdePasse) values (?, ?, ?);", [Dernier_Id, user, motsdepasse])
 
     base.close()
 
 def ajout_reservation(Client, Circuit, Places, Date): #testé
     base = connexion.cursor()
-    base.execute("select top 1 IdReservation from Reservation order by IdReservation Desc")
-    ligne = base.fetchone()
-    Dernier_Id = ligne.IdReservation
-    Dernier_Id = Dernier_Id + 1 #str peut-être nécessaire
-    base.execute("INSERT INTO Reservation (IdReservation , Place , DateRevervation , Etat  , IdCircuit, IdPersonne) VALUES (?, ?, ? , '1', ? , ? ) ; ", [Dernier_Id, Places, Date, Circuit, Client])
+
+    base.execute("INSERT INTO Reservation (Place , DateRevervation , Etat  , IdCircuit, IdPersonne) VALUES (?, ? , '1', ? , ? ) ; ", [Places, Date, Circuit, Client])
+
     base.execute("UPDATE Circuit SET NbPlaceDisponible= NbPlaceDisponible - ? where IdCircuit=? ;",[Places, Circuit])
     base.close()
 
@@ -73,10 +71,13 @@ def identification_passager(Nom, Prenom, DateNaissance): #testé
         if Nom == ligne.Nom and Prenom == ligne.Prenom and DateNaissance == ligne.DateNaissance:
             Id = ligne.IdPersonne
     if Id == 0:
+
+        base.execute("insert into Personne(Nom, Prenom, DateNaissance) values (?, ?, ?);", [Nom,Prenom,DateNaissance])
+
         base.execute("select top 1 IdPersonne from Personne order by IdPersonne Desc")
         ligne = base.fetchone()
-        Dernier_Id = ligne.IdPersonne + 1
-        base.execute("insert into Personne(IdPersonne, Nom, Prenom, DateNaissance) values (?, ?, ?, ?);", [Dernier_Id,Nom,Prenom,DateNaissance])
+        Dernier_Id = ligne.IdPersonne
+
         base.execute("insert into Passager(IdPersonne) values (?);",[Dernier_Id])
         Id = Dernier_Id
     else :
@@ -89,11 +90,9 @@ def identification_passager(Nom, Prenom, DateNaissance): #testé
 
 def ajout_circuit(Descriptif, Villedepart, Villearrivee, Paysdepart, Paysarrivee, Datedepart, Nbplacedisponible, Duree, Prixinscription):
     base = connexion.cursor() #testé
-    base.execute("Select top 1 IdCircuit from Circuit order by IdCircuit Desc;")
-    ligne = base.fetchone()
-    Dernier_Id = ligne.IdCircuit + 1
-    Liste =[Dernier_Id, Descriptif, Villedepart, Villearrivee, Paysdepart, Paysarrivee, Datedepart, Nbplacedisponible, Duree, Prixinscription]
-    base.execute("insert into Circuit(IdCircuit, Descriptif, VilleDepart, VilleArrivee, PaysDepart, PaysArrivee, DateDepart, NbPlaceDisponible, Duree, PrixInscription) values (?,?,?,?,?,?,?,?,?,?);", Liste)
+
+    Liste =[Descriptif, Villedepart, Villearrivee, Paysdepart, Paysarrivee, Datedepart, Nbplacedisponible, Duree, Prixinscription]
+    base.execute("insert into Circuit(Descriptif, VilleDepart, VilleArrivee, PaysDepart, PaysArrivee, DateDepart, NbPlaceDisponible, Duree, PrixInscription) values (?,?,?,?,?,?,?,?,?);", Liste)
     base.close()
 
 def prix_circuits(): #testé
@@ -147,13 +146,8 @@ def miseajour_lieu(): #testé
 
 def ajout_etape(IdCircuit, DateEtape, Duree, NomLieu, Ville, Pays): #testé
     base = connexion.cursor()
-    base.execute("select top 1 Ordre from Etape where IdCircuit = ? order by Ordre Desc;", [IdCircuit])
-    ligne = base.fetchone()
-    if ligne is None:
-        Dernier_Id = 1
-    else:
-        Dernier_Id = ligne.Ordre + 1
-    base.execute("insert into Etape(IdCircuit, Ordre, DateEtape, Duree, NomLieu, Ville, Pays) values(?,?,?,?,?,?,?);",[IdCircuit, Dernier_Id, DateEtape, Duree, NomLieu, Ville, Pays])
+
+    base.execute("insert into Etape(IdCircuit,DateEtape, Duree, NomLieu, Ville, Pays) values(?,?,?,?,?,?);",[IdCircuit, DateEtape, Duree, NomLieu, Ville, Pays])
     base.close()
 
 def suprime_etape(Idcircuit, Ordre): #testé
@@ -265,12 +259,20 @@ def test_ajout():
 
     #ajout_reservation(11, 1, 0, "2022-11-05")
 
-    ajout_circuit("Un tour chez les miniboys","Lille","Lille","France", "France","2022-05-24",15,2,59.87)
-    supprime_circuit(11)
+    ajout_circuit('Les minimes','Marseille','Strasbourg','France','France','2022-05-18',59,25,75.3)
+    ajout_lieu('Chateau', 'Minima', 'France', 'Ce chateau est la première étape sur le chemin des minimes', 25.1)
+
+    base = connexion.cursor()
+    base.execute("select top 1 IdCircuit from Circuit order by IdCircuit Desc")
+    ligne = base.fetchone()
+    Id = ligne.IdCircuit
+    base.close()
+
+    ajout_etape(Id,'2022-05-18', 2, 'Chateau', 'Minima', 'France')
 
     base = connexion.cursor()
 
-    base.execute("select * from Circuit;")    
+    base.execute("select * from Etape;")    
     for ligne in base:
         for i in range(len(ligne)):
             print(ligne[i], end=' // ')
@@ -283,3 +285,13 @@ test_ajout()
 #connexion.commit()
 #Dernière lignes / fin des connexions
 connexion.close()
+"""
+    base.execute("select top 1 IdPersonne from Personne order by IdPersonne Desc")
+    ligne = base.fetchone()
+    Dernier_Id = ligne.IdPersonne
+    base.close()
+
+    ajout_reservation(Dernier_Id, Circuit, Places, Date)
+
+    base = connexion.cursor()
+"""

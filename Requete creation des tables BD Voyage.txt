@@ -1,10 +1,10 @@
 CREATE TABLE Circuit(
-   IdCircuit INT IDENTITY,
+   IdCircuit INT IDENTITY(1,1),
    Descriptif VARCHAR(200) NOT NULL,
    VilleDepart VARCHAR(24) NOT NULL,
    VilleArrivee VARCHAR(24) NOT NULL,
    PaysDepart VARCHAR(24) NOT NULL,
-   PaysArrivee_ VARCHAR(24) NOT NULL,
+   PaysArrivee VARCHAR(24) NOT NULL,
    DateDepart DATE NOT NULL,
    NbPlaceDisponible int NOT NULL,
    Duree int NOT NULL,
@@ -22,7 +22,7 @@ CREATE TABLE Lieu(
 );
 
 CREATE TABLE Personne(
-   IdPersonne int IDENTITY,
+   IdPersonne int IDENTITY(1,1),
    Nom VARCHAR(24) NOT NULL,
    Prenom VARCHAR(24) NOT NULL,
    DateNaissance DATE NOT NULL,
@@ -40,7 +40,7 @@ CREATE TABLE Administrateur(
 
 CREATE TABLE Etape(
    IdCircuit int,
-   Ordre int IDENTITY,
+   Ordre int IDENTITY(1,1),
    DateEtape DATE NOT NULL,
    Duree int NOT NULL,
    NomLieu VARCHAR(24) NOT NULL,
@@ -53,7 +53,7 @@ CREATE TABLE Etape(
 
 CREATE TABLE Client(
    IdPersonne int,
-   Identifiant_ VARCHAR(50) NOT NULL,
+   Identifiant VARCHAR(50) NOT NULL,
    MotsdePasse VARCHAR(50) NOT NULL,
    PRIMARY KEY(IdPersonne),
    FOREIGN KEY(IdPersonne) REFERENCES Personne(IdPersonne)
@@ -66,7 +66,7 @@ CREATE TABLE Passager(
 );
 
 CREATE TABLE Reservation(
-   IdReservation int IDENTITY,
+   IdReservation int IDENTITY(1,1),
    Place int NOT NULL,
    DateRevervation DATE NOT NULL,
    Etat bit NOT NULL,
