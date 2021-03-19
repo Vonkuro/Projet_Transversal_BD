@@ -253,12 +253,54 @@ def supprime_circuit(Idcircuit): #testé
     base.close()
     return 0
 
+def input_test_text(string, taille): #testé
+    if len(string) > taille:
+        return False
+    return True
+
+def input_test_mail(string): #testé
+    position = string.find('@')
+    if position != -1:
+        string = string[position : ]
+        if string.find('.') != -1:
+            return True
+    return False
+
+def input_test_date(string): #testé
+    position_a = string.find('-')
+    if position_a != -1 :
+        annee = string[ : position_a]
+        position_m = string.find('-',position_a+1)
+        if position_m != -1 :
+            mois =  string[position_a+1 : position_m]
+            jour = string[position_m +1 : ]
+            try :
+                annee = int(annee)
+                mois = int(mois)
+                jour = int(jour)
+                datetime.date(annee,mois,jour)
+                return True
+            except :
+                return False
+    return False
+
+
 def test_ajout():
 
     #print(conversion_datestring_dateliste("2020-11-03"))
 
     #ajout_reservation(11, 1, 0, "2022-11-05")
-
+    if input_test_date("2021-02-02"):
+        print("date valide")
+    if input_test_date("2021 02 02"):
+        print("date sans -")
+    if input_test_date("2021-25-02"):
+        print("mois absurde")
+    if input_test_date("2021-02-45"):
+        print("jour absurde")
+    if input_test_date("2021-02-da"):
+        print("date avec lettres")
+"""
     ajout_circuit('Les minimes','Marseille','Strasbourg','France','France','2022-05-18',59,25,75.3)
     ajout_lieu('Chateau', 'Minima', 'France', 'Ce chateau est la première étape sur le chemin des minimes', 25.1)
 
@@ -279,19 +321,9 @@ def test_ajout():
         print('')
 
     base.close()
+"""
 
-
-test_ajout()
+#test_ajout()
 #connexion.commit()
 #Dernière lignes / fin des connexions
-connexion.close()
-"""
-    base.execute("select top 1 IdPersonne from Personne order by IdPersonne Desc")
-    ligne = base.fetchone()
-    Dernier_Id = ligne.IdPersonne
-    base.close()
-
-    ajout_reservation(Dernier_Id, Circuit, Places, Date)
-
-    base = connexion.cursor()
-"""
+#connexion.close()
