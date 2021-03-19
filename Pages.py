@@ -1,5 +1,5 @@
 import tkinter as tk
-
+from Main_test import *
 
 ecran = tk.Tk()
 

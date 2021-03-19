@@ -23,7 +23,7 @@ def verification_admin(user, motsdepasse): #testé
     base.close()
     return 0
 
-def ajout_client(user, motsdepasse, nom, prenom, datenaissance): #testé
+def ajout_client(user, motsdepasse, nom, prenom, datenaissance, mail): #testé
     base = connexion.cursor()
     base.execute("select top 1 IdPersonne from Personne order by IdPersonne Desc")
     ligne = base.fetchone()
@@ -31,7 +31,7 @@ def ajout_client(user, motsdepasse, nom, prenom, datenaissance): #testé
     Dernier_Id = str(Dernier_Id + 1)
     
 
-    demande = "insert into Personne(IdPersonne, Nom, Prenom, DateNaissance) values (" + Dernier_Id + ", " + nom + ", " + prenom + ", " + datenaissance
+    demande = "insert into Personne(IdPersonne, Nom, Prenom, DateNaissance, Mail) values (" + Dernier_Id + ", " + nom + ", " + prenom + ", " + datenaissance + ", " + mail
     demande = demande + ");"
     base.execute(demande)
     demande = "insert into Client(IdPersonne, Identifiant, MotsdePasse) values (" + Dernier_Id + ", " + user + ", " + motsdepasse + ");"
@@ -39,14 +39,14 @@ def ajout_client(user, motsdepasse, nom, prenom, datenaissance): #testé
 
     base.close()
 
-def ajout_admin(user, motsdepasse, nom, prenom, datenaissance): #testé
+def ajout_admin(user, motsdepasse, nom, prenom, datenaissance, mail): #testé
     base = connexion.cursor()
     base.execute("select top 1 IdPersonne from Personne order by IdPersonne Desc")
     ligne = base.fetchone()
     Dernier_Id = ligne.IdPersonne
     Dernier_Id = str(Dernier_Id + 1)
     
-    base.execute("insert into Personne(IdPersonne, Nom, Prenom, DateNaissance) values (?, ?, ?, ?);", [Dernier_Id,nom,prenom,datenaissance])
+    base.execute("insert into Personne(IdPersonne, Nom, Prenom, DateNaissance, Mail) values (?, ?, ?, ?, ?);", [Dernier_Id,nom,prenom,datenaissance, mail])
     
     base.execute("insert into Administrateur(IdPersonne, Identifiant, MotsdePasse) values (?, ?, ?);", [Dernier_Id, user, motsdepasse])
 
