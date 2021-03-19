@@ -1,0 +1,78 @@
+CREATE TABLE Circuit(
+   IdCircuit VARCHAR(16),
+   Descriptif VARCHAR(200) NOT NULL,
+   VilleDepart VARCHAR(24) NOT NULL,
+   VilleArrivee VARCHAR(24) NOT NULL,
+   PaysDepart VARCHAR(24) NOT NULL,
+   PaysArrivee_ VARCHAR(24) NOT NULL,
+   DateDepart DATE NOT NULL,
+   NbPlaceDisponible int NOT NULL,
+   Duree int NOT NULL,
+   PrixInscription float NOT NULL,
+   PRIMARY KEY(IdCircuit)
+);
+
+CREATE TABLE Lieu(
+   NomLieu VARCHAR(24),
+   Ville VARCHAR(24),
+   Pays VARCHAR(24),
+   Descriptif VARCHAR(250) NOT NULL,
+   PrixVisite float NOT NULL,
+   PRIMARY KEY(NomLieu, Ville, Pays)
+);
+
+CREATE TABLE Personne(
+   IdPersonne VARCHAR(16),
+   Nom VARCHAR(24) NOT NULL,
+   Prenom VARCHAR(24) NOT NULL,
+   DateNaissance DATE NOT NULL,
+   Mail VARCHAR(50),
+   PRIMARY KEY(IdPersonne)
+);
+
+CREATE TABLE Administrateur(
+   IdPersonne VARCHAR(16),
+   Identifiant VARCHAR(50) NOT NULL,
+   MotsdePasse VARCHAR(50) NOT NULL,
+   PRIMARY KEY(IdPersonne),
+   FOREIGN KEY(IdPersonne) REFERENCES Personne(IdPersonne)
+);
+
+CREATE TABLE Etape(
+   IdCircuit VARCHAR(16),
+   Ordre int,
+   DateEtape DATE NOT NULL,
+   Duree int NOT NULL,
+   NomLieu VARCHAR(24) NOT NULL,
+   Ville VARCHAR(24) NOT NULL,
+   Pays VARCHAR(24) NOT NULL,
+   PRIMARY KEY(IdCircuit, Ordre),
+   FOREIGN KEY(IdCircuit) REFERENCES Circuit(IdCircuit),
+   FOREIGN KEY(NomLieu, Ville, Pays) REFERENCES Lieu(NomLieu, Ville, Pays)
+);
+
+CREATE TABLE Client(
+   IdPersonne VARCHAR(16),
+   Identifiant_ VARCHAR(50) NOT NULL,
+   MotsdePasse VARCHAR(50) NOT NULL,
+   PRIMARY KEY(IdPersonne),
+   FOREIGN KEY(IdPersonne) REFERENCES Personne(IdPersonne)
+);
+
+CREATE TABLE Passager(
+   IdPersonne VARCHAR(16),
+   PRIMARY KEY(IdPersonne),
+   FOREIGN KEY(IdPersonne) REFERENCES Personne(IdPersonne)
+);
+
+CREATE TABLE Reservation(
+   IdReservation VARCHAR(16),
+   Place int NOT NULL,
+   DateRevervation DATE NOT NULL,
+   Etat bit NOT NULL,
+   IdPersonne VARCHAR(16) NOT NULL,
+   IdCircuit VARCHAR(16) NOT NULL,
+   PRIMARY KEY(IdReservation),
+   FOREIGN KEY(IdPersonne) REFERENCES Client(IdPersonne),
+   FOREIGN KEY(IdCircuit) REFERENCES Circuit(IdCircuit)
+);
