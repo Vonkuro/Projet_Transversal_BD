@@ -1,5 +1,5 @@
 CREATE TABLE Circuit(
-   IdCircuit VARCHAR(16),
+   IdCircuit INT IDENTITY,
    Descriptif VARCHAR(200) NOT NULL,
    VilleDepart VARCHAR(24) NOT NULL,
    VilleArrivee VARCHAR(24) NOT NULL,
@@ -22,7 +22,7 @@ CREATE TABLE Lieu(
 );
 
 CREATE TABLE Personne(
-   IdPersonne VARCHAR(16),
+   IdPersonne int IDENTITY,
    Nom VARCHAR(24) NOT NULL,
    Prenom VARCHAR(24) NOT NULL,
    DateNaissance DATE NOT NULL,
@@ -31,7 +31,7 @@ CREATE TABLE Personne(
 );
 
 CREATE TABLE Administrateur(
-   IdPersonne VARCHAR(16),
+   IdPersonne int,
    Identifiant VARCHAR(50) NOT NULL,
    MotsdePasse VARCHAR(50) NOT NULL,
    PRIMARY KEY(IdPersonne),
@@ -39,8 +39,8 @@ CREATE TABLE Administrateur(
 );
 
 CREATE TABLE Etape(
-   IdCircuit VARCHAR(16),
-   Ordre int,
+   IdCircuit int,
+   Ordre int IDENTITY,
    DateEtape DATE NOT NULL,
    Duree int NOT NULL,
    NomLieu VARCHAR(24) NOT NULL,
@@ -52,7 +52,7 @@ CREATE TABLE Etape(
 );
 
 CREATE TABLE Client(
-   IdPersonne VARCHAR(16),
+   IdPersonne int,
    Identifiant_ VARCHAR(50) NOT NULL,
    MotsdePasse VARCHAR(50) NOT NULL,
    PRIMARY KEY(IdPersonne),
@@ -60,19 +60,29 @@ CREATE TABLE Client(
 );
 
 CREATE TABLE Passager(
-   IdPersonne VARCHAR(16),
+   IdPersonne int,
    PRIMARY KEY(IdPersonne),
    FOREIGN KEY(IdPersonne) REFERENCES Personne(IdPersonne)
 );
 
 CREATE TABLE Reservation(
-   IdReservation VARCHAR(16),
+   IdReservation int IDENTITY,
    Place int NOT NULL,
    DateRevervation DATE NOT NULL,
    Etat bit NOT NULL,
-   IdPersonne VARCHAR(16) NOT NULL,
-   IdCircuit VARCHAR(16) NOT NULL,
+   IdPersonne int NOT NULL,
+   IdCircuit int NOT NULL,
    PRIMARY KEY(IdReservation),
    FOREIGN KEY(IdPersonne) REFERENCES Client(IdPersonne),
    FOREIGN KEY(IdCircuit) REFERENCES Circuit(IdCircuit)
+);
+
+CREATE TABLE Groupe(
+   IdPersonne INT,
+   IdReservation INT,
+   Confirmation bit NOT NULL,
+   DateAnnulation DATE,
+   PRIMARY KEY(IdPersonne, IdReservation),
+   FOREIGN KEY(IdPersonne) REFERENCES Passager(IdPersonne),
+   FOREIGN KEY(IdReservation) REFERENCES Reservation(IdReservation)
 );
