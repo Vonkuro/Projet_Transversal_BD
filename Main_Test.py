@@ -52,6 +52,13 @@ def ajout_admin(user, motsdepasse, nom, prenom, datenaissance, mail): #testé
 
     base.close()
 
+def update_admin(user, motsdepasse, nom, prenom, datenaissance, mail, Id): #testé
+    base = connexion.cursor()
+    base.execute("Update Personne set Nom = ?, Prenom = ?, DateNaissance = ?, Mail = ? where IdPersonne = ?;", [nom,prenom,datenaissance, mail, Id])
+    base.execute("Update Administrateur set Identifiant = ?, MotsdePasse = ? where IdPersonne = ?;", [user, motsdepasse, Id])
+    base.close()
+
+
 def ajout_reservation(Client, Circuit, Places, Date): #testé
     base = connexion.cursor()
 
@@ -254,7 +261,7 @@ def supprime_circuit(Idcircuit): #testé
     return 0
 
 def input_test_text(string, taille): #testé
-    if len(string) > taille:
+    if len(string) > taille and len(string) != 0:
         return False
     return True
 
@@ -290,16 +297,22 @@ def test_ajout():
     #print(conversion_datestring_dateliste("2020-11-03"))
 
     #ajout_reservation(11, 1, 0, "2022-11-05")
-    if input_test_date("2021-02-02"):
-        print("date valide")
-    if input_test_date("2021 02 02"):
-        print("date sans -")
-    if input_test_date("2021-25-02"):
-        print("mois absurde")
-    if input_test_date("2021-02-45"):
-        print("jour absurde")
-    if input_test_date("2021-02-da"):
-        print("date avec lettres")
+    update_admin('gagaga', '212223', 'Tiberghien', 'Gaëtan', '1996-11-07', 'gaetan.tiberghien@epsi.fr', 14)
+    base = connexion.cursor()
+
+    base.execute("select * from Administrateur;")    
+    for ligne in base:
+        for i in range(len(ligne)):
+            print(ligne[i], end=' // ')
+        print('')
+
+    base.execute("select * from Personne;")    
+    for ligne in base:
+        for i in range(len(ligne)):
+            print(ligne[i], end=' // ')
+        print('')
+
+    base.close()
 """
     ajout_circuit('Les minimes','Marseille','Strasbourg','France','France','2022-05-18',59,25,75.3)
     ajout_lieu('Chateau', 'Minima', 'France', 'Ce chateau est la première étape sur le chemin des minimes', 25.1)

@@ -97,7 +97,7 @@ class create_compte():
         self.formulaire.pack_forget()
         self.buton.pack_forget()
 
-    def envois(self):
+    def envois(self): #ATTETION tu ne vérifie pas si les Entry sont vide !!!
         Erreur = False
         Liste = []
         user_var = self.user_en.get()
@@ -257,6 +257,8 @@ class Liste_Admin():
         self.pwd_list.append(tk.Label(master=self.tableau, text="Mots de passe"))
         self.pwd_list[0].grid(row=0,column=5)
 
+        self.Id_list = []
+
         self.suppr_list = []
         self.suppr_list.append(tk.Label(master=self.tableau, text="Supprimer"))
         self.suppr_list[0].grid(row=0,column=6)
@@ -267,7 +269,7 @@ class Liste_Admin():
 
     def lire_admin(self):
         base = connexion.cursor()
-        base.execute("select Nom, Prenom, Mail, DateNaissance, Identifiant, MotsdePasse from Personne inner join Administrateur on Personne.IdPersonne = Administrateur.IdPersonne ;")
+        base.execute("select Nom, Prenom, Mail, DateNaissance, Identifiant, MotsdePasse, Personne.IdPersonne from Personne inner join Administrateur on Personne.IdPersonne = Administrateur.IdPersonne ;")
         ligne_nb = 1
         for ligne_base in base:
             self.nom_list.append(tk.Label(master=self.tableau, text=ligne_base.Nom))
@@ -288,10 +290,12 @@ class Liste_Admin():
             self.pwd_list.append(tk.Label(master=self.tableau, text=ligne_base.MotsdePasse))
             self.pwd_list[ligne_nb].grid(row=ligne_nb,column=5)
 
+            self.Id_list.append(ligne_base.IdPersonne)
+
             self.suppr_list.append(tk.Label(master=self.tableau, text="Supprimer"))
             self.suppr_list[ligne_nb].grid(row=ligne_nb,column=6)
 
-            self.modif_list.append(tk.Label(master=self.tableau, text="Modifier")) #Modifier pour les boutons
+            self.modif_list.append(tk.Button(master=self.tableau, text="Modifier", command= lambda: self.modifier_active(ligne_nb))) #Modifier pour les boutons
             self.modif_list[ligne_nb].grid(row=ligne_nb,column=7)
 
         base.close()
@@ -309,6 +313,61 @@ class Liste_Admin():
         self.titre.pack_forget()
         self.buton.pack_forget()
         self.tableau.pack_forget()
+    
+    def modifier_active(self, ligne_nb):
+        #on fais disparaitre les Labels
+        self.nom_list[ligne_nb].grid_forget()
+        self.prenom_list[ligne_nb].grid_forget()
+        self.mail_list[ligne_nb].grid_forget()
+        self.date_list[ligne_nb].grid_forget()
+        self.user_list[ligne_nb].grid_forget()
+        self.pwd_list[ligne_nb].grid_forget()
+        self.suppr_list[ligne_nb].grid_forget()
+        self.modif_list[ligne_nb].grid_forget()
+        #on fait apparaître les Entrys
+        self.nom_modif = tk.Entry(master=self.tableau)
+        self.nom_modif.insert(0,self.nom_list[ligne_nb].cget("text"))
+        self.nom_modif.grid(row=ligne_nb,column=0)
+
+        self.prenom_modif = tk.Entry(master=self.tableau)
+        self.prenom_modif.insert(0, self.prenom_list[ligne_nb].cget("text"))
+        self.prenom_modif.grid(row=ligne_nb, column=1)
+
+        self.mail_modif = tk.Entry(master=self.tableau)
+        self.mail_modif.insert(0, self.mail_list[ligne_nb].cget("text"))
+        self.mail_modif.grid(row=ligne_nb, column=2)
+
+        self.date_modif = tk.Entry(master=self.tableau)
+        self.date_modif.insert(0, self.date_list[ligne_nb].cget("text"))
+        self.date_modif.grid(row=ligne_nb, column=3)
+
+        self.user_modif = tk.Entry(master=self.tableau)
+        self.user_modif.insert(0, self.user_list[ligne_nb].cget("text"))
+        self.user_modif.grid(row=ligne_nb, column=4)
+
+        self.pwd_modif = tk.Entry(master=self.tableau)
+        self.pwd_modif.insert(0, self.pwd_list[ligne_nb].cget("text"))
+        self.pwd_modif.grid(row=ligne_nb, column=5)
+
+        self.suppr_modif = tk.Label(master=self.tableau, text="Supprimer")
+        self.suppr_modif.grid(row=ligne_nb, column=6)
+
+        self.modif_modif = tk.Button(master=self.tableau, text="Modifier", command= lambda: self.modifier_enregistre(ligne_nb))
+        self.modif_modif.grid(row=ligne_nb, column=7)
+        
+        
+
+    def modifier_enregistre(self, ligne_nb):
+        self.Id_list[ligne_nb-1]
+        #input_test_mail
+        #input_test_date
+        Error = False
+        if not input_test_text(self.nom_modif.get(), 24):
+            Error= True
+        if not input_test_text(self.prenom_modif.get(), 24):
+            Error= True
+        if not input_test_text(self.user_modif.get(), 50):
+            Error= True
 
 #Fonctionnement des boutons
 def changement_page(Actuelle, Suivante):
@@ -353,7 +412,7 @@ def Application():
     #butons Accueil Admin
     clients_a_a = tk.Button(master=Accueil_Ad.buton, text="Listes Clients")
     clients_a_a.pack()
-    administrateurs_a_a  = tk.Button(master=Accueil_Ad.buton, text="Listes Administrateurs")
+    administrateurs_a_a  = tk.Button(master=Accueil_Ad.buton, text="Listes Administrateurs", command= lambda: changement_page(Accueil_Ad, Liste_Ad))
     administrateurs_a_a.pack()
     circuits_a_a = tk.Button(master=Accueil_Ad.buton, text="Listes Circuits")
     circuits_a_a.pack()
@@ -363,6 +422,9 @@ def Application():
     lieux_a_a.pack()
     accueil_admin_logout = tk.Button(master=Accueil_Ad.buton, text="log out", command= lambda: Log_Out(Login_page, Accueil_Ad))
     accueil_admin_logout.pack()
+    #butons Liste Admin
+    retour_la = tk.Button(master=Liste_Ad.entete, text="Retour à la liste des pages", command= lambda: changement_page(Liste_Ad, Accueil_Ad))
+    retour_la.pack()
 
     #Fonctionnement
     #Login_page.affiche()
