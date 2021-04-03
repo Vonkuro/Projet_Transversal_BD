@@ -7,7 +7,7 @@ IdPersonne = 0
 
 class Login():
     def __init__(self):
-        self.titre = tk.Frame()
+        self.titre = tk.Frame(width=300, height=5000)#on donne à chaque frame une taille
         self.formulaire = tk.Frame()
         self.buton = tk.Frame()
 
@@ -27,6 +27,10 @@ class Login():
         self.titre.pack()
         self.formulaire.pack()
         self.buton.pack()
+        #On rajoute la propriété propagate(0) afin que la frame ne s'adapte pas à ses wiglets
+        self.titre.propagate(0)
+        self.formulaire.propagate(0)
+        self.buton.propagate(0)
     
     def verifications(self):
         global IdPersonne
@@ -90,6 +94,7 @@ class create_compte():
         self.titre.pack()
         self.formulaire.pack()
         self.buton.pack()
+        
         
     
     def cache(self):
@@ -358,7 +363,6 @@ class Liste_Admin():
         
 
     def modifier_enregistre(self, ligne_nb):
-        self.Id_list[ligne_nb-1]
         #input_test_mail
         #input_test_date
         Error = False
@@ -368,6 +372,15 @@ class Liste_Admin():
             Error= True
         if not input_test_text(self.user_modif.get(), 50):
             Error= True
+        if not input_test_text(self.pwd_modif.get(), 50):
+            Error= True
+        if not input_test_date(self.date_modif.get()):
+            Error= True
+        if not input_test_mail(self.mail_modif.get()):
+            Error= True
+        if not Error:
+            update_admin(self.user_modif.get(), self.pwd_modif.get(), self.nom_modif.get(), self.prenom_modif.get(), self.date_modif.get(), self.mail_modif.get(), self.Id_list[ligne_nb-1])
+            #forget les entrys et recharge la page
 
 #Fonctionnement des boutons
 def changement_page(Actuelle, Suivante):
@@ -393,6 +406,8 @@ def Log_Out(Log, Actuelle):
 #Main
 def Application():
     ecran = tk.Tk()
+    ecran.geometry=("300x5000")
+    ecran.resizable(width=0, height=0)#on met ces deux lignes et magie ça marche
     #initialisation des pages
     Login_page = Login()
     Creation_Client = create_compte()
@@ -427,8 +442,8 @@ def Application():
     retour_la.pack()
 
     #Fonctionnement
-    #Login_page.affiche()
-    Liste_Ad.affiche()
+    Login_page.affiche()
+    #Liste_Ad.affiche()
     ecran.mainloop()
     connexion.close()
 
