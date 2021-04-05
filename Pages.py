@@ -359,7 +359,7 @@ class Liste_Admin():
         self.pwd_modif.insert(0, self.pwd_list[ligne_nb].cget("text"))
         self.pwd_modif.grid(row=ligne_nb, column=5)
 
-        self.suppr_modif = tk.Button(master=self.tableau, text="Supprimer", command= lambda: self.Supprime(self.Id_list[ligne_nb],ligne_nb))
+        self.suppr_modif = tk.Label(master=self.tableau, text="Supprimer") 
         self.suppr_modif.grid(row=ligne_nb, column=6)
 
         self.modif_modif = tk.Button(master=self.tableau, text="Modifier", command= lambda: self.modifier_enregistre(ligne_nb))
@@ -483,39 +483,165 @@ class Liste_Lieux():
         self.titre.pack_forget()
         self.buton.pack_forget()
         self.tableau.pack_forget()
-        #self.grand_buton_ajout.destroy()
+        self.grand_buton_ajout.destroy()
     
     def les_liste(self):
-        #modèle
-        #self.nom_list = []
-        #self.nom_list.append(tk.Label(master=self.tableau, text="Nom"))
-        #self.nom_list[0].grid(row=0,column=0)
+
         self.nom_list =[]
         self.nom_list.append(tk.Label(master=self.tableau, text="Nom du Lieu"))
         self.nom_list[0].grid(row=0,column=0)
 
         self.ville_list =[]
         self.ville_list.append(tk.Label(master=self.tableau, text="Ville"))
-        self.ville_list[0].grid(row=1,column=0)
+        self.ville_list[0].grid(row=0,column=1)
 
         self.pays_list =[]
         self.pays_list.append(tk.Label(master=self.tableau, text="Pays"))
-        self.pays_list[0].grid(row=2,column=0)
+        self.pays_list[0].grid(row=0,column=2)
 
         self.descriptifs_list =[]
         self.descriptifs_list.append(tk.Label(master=self.tableau, text="Descriptifs"))
-        self.descriptifs_list[0].grid(row=3,column=0)
+        self.descriptifs_list[0].grid(row=0,column=3)
 
         self.prix_list =[]
         self.prix_list.append(tk.Label(master=self.tableau, text="Prix"))
-        self.prix_list[0].grid(row=4,column=0)
+        self.prix_list[0].grid(row=0,column=4)
 
-        self.descriptifs_list =[]
-        self.descriptifs_list.append(tk.Label(master=self.tableau, text="Descriptifs"))
-        self.descriptifs_list[0].grid(row=3,column=0)
+        self.suppr_list = []
+        self.suppr_list.append(tk.Label(master=self.tableau, text="Supprimer"))
+        self.suppr_list[0].grid(row=0,column=5)
 
-        
+        self.modif_list = []
+        self.modif_list.append(tk.Label(master=self.tableau, text="Modifier"))
+        self.modif_list[0].grid(row=0,column=6)
 
     def lire_lieux(self):
-        agir=0
+        base = connexion.cursor()
+        base.execute("select * from Lieu;")
+        ligne_nb = 1
+        for ligne_base in base:
+            
+            self.nom_list.append(tk.Label(master=self.tableau, text=ligne_base.NomLieu))
+            self.nom_list[ligne_nb].grid(row=ligne_nb,column=0)
 
+            self.ville_list.append(tk.Label(master=self.tableau, text=ligne_base.Ville))
+            self.ville_list[ligne_nb].grid(row=ligne_nb,column=1)
+
+            self.pays_list.append(tk.Label(master=self.tableau, text=ligne_base.Pays))
+            self.pays_list[ligne_nb].grid(row=ligne_nb,column=2)
+
+            self.descriptifs_list.append(tk.Label(master=self.tableau, text=ligne_base.Descriptif))
+            self.descriptifs_list[ligne_nb].grid(row=ligne_nb,column=3)
+
+            self.prix_list.append(tk.Label(master=self.tableau, text=ligne_base.PrixVisite))
+            self.prix_list[ligne_nb].grid(row=ligne_nb,column=4)
+
+            self.suppr_list.append(tk.Button(master=self.tableau, text="Supprimer", command= lambda var_ligne = ligne_nb : self.Supprime(var_ligne))) #
+            self.suppr_list[ligne_nb].grid(row=ligne_nb,column=5)
+
+            self.modif_list.append(tk.Button(master=self.tableau, text="Modifier", command= lambda var_ligne = ligne_nb : self.modifier_active(var_ligne)))
+            self.modif_list[ligne_nb].grid(row=ligne_nb,column=6)
+            ligne_nb = ligne_nb + 1
+
+        base.close()
+        self.grand_buton_ajout = tk.Button(master=self.buton, text= "Ajouter",command= lambda: self.Ajout_form(ligne_nb))
+        self.grand_buton_ajout.pack()
+
+    def modifier_active(self, ligne_nb):
+        #on fais disparaitre les Labels
+        self.nom_list[ligne_nb].grid_forget()
+        self.ville_list[ligne_nb].grid_forget()
+        self.pays_list[ligne_nb].grid_forget()
+        self.descriptifs_list[ligne_nb].grid_forget()
+        self.prix_list[ligne_nb].grid_forget()
+        self.suppr_list[ligne_nb].grid_forget()
+        self.modif_list[ligne_nb].grid_forget()
+        #on fait apparaître les Entrys
+        self.nom_modif = tk.Entry(master=self.tableau)
+        self.nom_modif.insert(0,self.nom_list[ligne_nb].cget("text"))
+        self.nom_modif.grid(row=ligne_nb,column=0)
+
+        self.ville_modif = tk.Entry(master=self.tableau)
+        self.ville_modif.insert(0,self.ville_list[ligne_nb].cget("text"))
+        self.ville_modif.grid(row=ligne_nb,column=1)
+
+        self.pays_modif = tk.Entry(master=self.tableau)
+        self.pays_modif.insert(0,self.pays_list[ligne_nb].cget("text"))
+        self.pays_modif.grid(row=ligne_nb,column=2)
+
+        self.descriptifs_modif = tk.Entry(master=self.tableau)
+        self.descriptifs_modif.insert(0,self.descriptifs_list[ligne_nb].cget("text"))
+        self.descriptifs_modif.grid(row=ligne_nb,column=3)
+
+        self.prix_modif = tk.Entry(master=self.tableau)
+        self.prix_modif.insert(0,self.prix_list[ligne_nb].cget("text"))
+        self.prix_modif.grid(row=ligne_nb,column=4)
+
+        self.suppr_modif = tk.Label(master=self.tableau, text="Supprimer") 
+        self.suppr_modif.grid(row=ligne_nb, column=5)
+
+        self.modif_modif = tk.Button(master=self.tableau, text="Modifier", command= lambda: self.modifier_enregistre(ligne_nb))
+        self.modif_modif.grid(row=ligne_nb, column=6)
+
+    def modifier_enregistre(self, ligne_nb):
+        agir = "attendre" #écrire la fonction update_lieu
+
+    def Supprime(self, ligne):
+        supprime_lieu(self.nom_list[ligne].cget("text"), self.ville_list[ligne].cget("text"), self.pays_list[ligne].cget("text"))
+        
+        self.nom_list[ligne].grid_forget()
+        self.ville_list[ligne].grid_forget()
+        self.pays_list[ligne].grid_forget()
+        self.descriptifs_list[ligne].grid_forget()
+        self.prix_list[ligne].grid_forget()
+        self.suppr_list[ligne].grid_forget()
+        self.modif_list[ligne].grid_forget()
+        self.cache()
+        self.affiche()
+
+    def Ajout_form(self, ligne):
+        #on fait apparaître les Entrys
+        self.nom_ajout = tk.Entry(master=self.tableau)
+        self.nom_ajout.grid(row=ligne,column=0)
+
+        self.ville_ajout = tk.Entry(master=self.tableau)
+        self.ville_ajout.grid(row=ligne,column=1)
+
+        self.pays_ajout = tk.Entry(master=self.tableau)
+        self.pays_ajout.grid(row=ligne,column=2)
+
+        self.descriptifs_ajout = tk.Entry(master=self.tableau)
+        self.descriptifs_ajout.grid(row=ligne,column=3)
+
+        self.prix_ajout = tk.Entry(master=self.tableau)
+        self.prix_ajout.grid(row=ligne,column=4)
+
+        self.buton_ajout = tk.Button(master=self.tableau, text="Validation", command= lambda: self.Ajout_action())
+        self.buton_ajout.grid(row=ligne,column=5)
+    
+    def Ajout_action(self):
+        Error = False
+        if not input_test_text(self.nom_ajout.get(), 24):
+            Error= True
+        if not input_test_text(self.ville_ajout.get(), 24):
+            Error= True
+        if not input_test_text(self.pays_ajout.get(), 24):
+            Error= True
+        if not input_test_text(self.descriptifs_ajout.get(), 250):
+            Error= True
+        try :
+            float(self.prix_ajout.get())
+        except:
+            Error= True
+        if not Error:
+            ajout_lieu(self.nom_ajout.get(), self.ville_ajout.get(), self.pays_ajout.get(), self.descriptifs_ajout.get(), float(self.prix_ajout.get()))
+            
+            self.nom_ajout.grid_forget()
+            self.ville_ajout.grid_forget()
+            self.pays_ajout.grid_forget()
+            self.descriptifs_ajout.grid_forget()
+            self.prix_ajout.grid_forget()
+            self.buton_ajout.grid_forget()
+            
+            self.cache()
+            self.affiche()
