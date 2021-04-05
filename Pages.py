@@ -5,6 +5,7 @@ from Main_Test import *
 IdPersonne = 0
 
 
+
 class Login():
     def __init__(self):
         self.titre = tk.Frame(width=300, height=5000)#on donne à chaque frame une taille
@@ -262,7 +263,7 @@ class Liste_Admin():
         self.pwd_list.append(tk.Label(master=self.tableau, text="Mots de passe"))
         self.pwd_list[0].grid(row=0,column=5)
 
-        self.Id_list = []
+        self.Id_list = [0]
 
         self.suppr_list = []
         self.suppr_list.append(tk.Label(master=self.tableau, text="Supprimer"))
@@ -297,13 +298,16 @@ class Liste_Admin():
 
             self.Id_list.append(ligne_base.IdPersonne)
 
-            self.suppr_list.append(tk.Label(master=self.tableau, text="Supprimer"))
+            self.suppr_list.append(tk.Button(master=self.tableau, text="Supprimer", command= lambda: self.Supprime(self.Id_list[ligne_nb],ligne_nb)))
             self.suppr_list[ligne_nb].grid(row=ligne_nb,column=6)
 
             self.modif_list.append(tk.Button(master=self.tableau, text="Modifier", command= lambda: self.modifier_active(ligne_nb))) #Modifier pour les boutons
             self.modif_list[ligne_nb].grid(row=ligne_nb,column=7)
+            ligne_nb = ligne_nb + 1
 
         base.close()
+        self.grand_buton_ajout = tk.Button(master=self.buton, text= "Ajouter", command= lambda: self.Ajout_form(ligne_nb))
+        self.grand_buton_ajout.pack()
 
     def affiche(self):
         self.les_liste()
@@ -318,6 +322,7 @@ class Liste_Admin():
         self.titre.pack_forget()
         self.buton.pack_forget()
         self.tableau.pack_forget()
+        self.grand_buton_ajout.destroy()
     
     def modifier_active(self, ligne_nb):
         #on fais disparaitre les Labels
@@ -354,7 +359,7 @@ class Liste_Admin():
         self.pwd_modif.insert(0, self.pwd_list[ligne_nb].cget("text"))
         self.pwd_modif.grid(row=ligne_nb, column=5)
 
-        self.suppr_modif = tk.Label(master=self.tableau, text="Supprimer")
+        self.suppr_modif = tk.Button(master=self.tableau, text="Supprimer", command= lambda: self.Supprime(self.Id_list[ligne_nb],ligne_nb))
         self.suppr_modif.grid(row=ligne_nb, column=6)
 
         self.modif_modif = tk.Button(master=self.tableau, text="Modifier", command= lambda: self.modifier_enregistre(ligne_nb))
@@ -380,7 +385,80 @@ class Liste_Admin():
             Error= True
         if not Error:
             update_admin(self.user_modif.get(), self.pwd_modif.get(), self.nom_modif.get(), self.prenom_modif.get(), self.date_modif.get(), self.mail_modif.get(), self.Id_list[ligne_nb-1])
+            connexion.commit()
             #forget les entrys et recharge la page
+            self.nom_modif.grid_forget()
+            self.prenom_modif.grid_forget()
+            self.user_modif.grid_forget()
+            self.pwd_modif.grid_forget()
+            self.date_modif.grid_forget()
+            self.mail_modif.grid_forget()
+            self.cache()
+            self.affiche()
+
+    def Supprime(self, Id, ligne_nb):
+        self.nom_list[ligne_nb].grid_forget()
+        self.prenom_list[ligne_nb].grid_forget()
+        self.mail_list[ligne_nb].grid_forget()
+        self.date_list[ligne_nb].grid_forget()
+        self.user_list[ligne_nb].grid_forget()
+        self.pwd_list[ligne_nb].grid_forget()
+        self.suppr_list[ligne_nb].grid_forget()
+        self.modif_list[ligne_nb].grid_forget()
+        supprime_admin(Id)
+        connexion.commit()
+        self.cache()
+        self.affiche()
+
+    def Ajout_form(self, ligne):
+        #on fait apparaître les Entrys
+        self.nom_ajout = tk.Entry(master=self.tableau)
+        self.nom_ajout.grid(row=ligne,column=0)
+
+        self.prenom_ajout = tk.Entry(master=self.tableau)
+        self.prenom_ajout.grid(row=ligne, column=1)
+
+        self.mail_ajout = tk.Entry(master=self.tableau)
+        self.mail_ajout.grid(row=ligne, column=2)
+
+        self.date_ajout = tk.Entry(master=self.tableau)
+        self.date_ajout.grid(row=ligne, column=3)
+
+        self.user_ajout = tk.Entry(master=self.tableau)
+        self.user_ajout.grid(row=ligne, column=4)
+
+        self.pwd_ajout = tk.Entry(master=self.tableau)
+        self.pwd_ajout.grid(row=ligne, column=5)
+
+        self.buton_ajout = tk.Button(master=self.tableau, text="Validation", command= lambda:self.Ajout_action())
+        self.buton_ajout.grid(row=ligne, column=6)
+
+    def Ajout_action(self):
+        Error = False
+        if not input_test_text(self.nom_ajout.get(), 24):
+            Error= True
+        if not input_test_text(self.prenom_ajout.get(), 24):
+            Error= True
+        if not input_test_text(self.user_ajout.get(), 50):
+            Error= True
+        if not input_test_text(self.pwd_ajout.get(), 50):
+            Error= True
+        if not input_test_date(self.date_ajout.get()):
+            Error= True
+        if not input_test_mail(self.mail_ajout.get()):
+            Error= True
+        if not Error:
+            ajout_admin(self.user_ajout.get(), self.pwd_ajout.get(), self.nom_ajout.get(), self.prenom_ajout.get(), self.date_ajout.get(), self.mail_ajout.get())
+            connexion.commit()
+            self.user_ajout.grid_forget()
+            self.pwd_ajout.grid_forget()
+            self.nom_ajout.grid_forget()
+            self.prenom_ajout.grid_forget()
+            self.date_ajout.grid_forget()
+            self.mail_ajout.grid_forget()
+            self.buton_ajout.grid_forget()
+            self.cache()
+            self.affiche()
 
 #Fonctionnement des boutons
 def changement_page(Actuelle, Suivante):
@@ -442,8 +520,8 @@ def Application():
     retour_la.pack()
 
     #Fonctionnement
-    Login_page.affiche()
-    #Liste_Ad.affiche()
+    #Login_page.affiche()
+    Liste_Ad.affiche()
     ecran.mainloop()
     connexion.close()
 
