@@ -297,11 +297,11 @@ class Liste_Admin():
             self.pwd_list[ligne_nb].grid(row=ligne_nb,column=5)
 
             self.Id_list.append(ligne_base.IdPersonne)
-
-            self.suppr_list.append(tk.Button(master=self.tableau, text="Supprimer", command= lambda: self.Supprime(self.Id_list[ligne_nb],ligne_nb)))
+            
+            self.suppr_list.append(tk.Button(master=self.tableau, text="Supprimer", command= lambda var_id = self.Id_list[ligne_nb], var_ligne = ligne_nb : self.Supprime(var_id,var_ligne)))
             self.suppr_list[ligne_nb].grid(row=ligne_nb,column=6)
 
-            self.modif_list.append(tk.Button(master=self.tableau, text="Modifier", command= lambda: self.modifier_active(ligne_nb))) #Modifier pour les boutons
+            self.modif_list.append(tk.Button(master=self.tableau, text="Modifier", command= lambda var_ligne = ligne_nb: self.modifier_active(var_ligne))) #Modifier pour les boutons
             self.modif_list[ligne_nb].grid(row=ligne_nb,column=7)
             ligne_nb = ligne_nb + 1
 
@@ -486,7 +486,35 @@ class Liste_Lieux():
         #self.grand_buton_ajout.destroy()
     
     def les_liste(self):
-        agir_2=0
+        #modèle
+        #self.nom_list = []
+        #self.nom_list.append(tk.Label(master=self.tableau, text="Nom"))
+        #self.nom_list[0].grid(row=0,column=0)
+        self.nom_list =[]
+        self.nom_list.append(tk.Label(master=self.tableau, text="Nom du Lieu"))
+        self.nom_list[0].grid(row=0,column=0)
+
+        self.ville_list =[]
+        self.ville_list.append(tk.Label(master=self.tableau, text="Ville"))
+        self.ville_list[0].grid(row=1,column=0)
+
+        self.pays_list =[]
+        self.pays_list.append(tk.Label(master=self.tableau, text="Pays"))
+        self.pays_list[0].grid(row=2,column=0)
+
+        self.descriptifs_list =[]
+        self.descriptifs_list.append(tk.Label(master=self.tableau, text="Descriptifs"))
+        self.descriptifs_list[0].grid(row=3,column=0)
+
+        self.prix_list =[]
+        self.prix_list.append(tk.Label(master=self.tableau, text="Prix"))
+        self.prix_list[0].grid(row=4,column=0)
+
+        self.descriptifs_list =[]
+        self.descriptifs_list.append(tk.Label(master=self.tableau, text="Descriptifs"))
+        self.descriptifs_list[0].grid(row=3,column=0)
+
+        
 
     def lire_lieux(self):
         agir=0
