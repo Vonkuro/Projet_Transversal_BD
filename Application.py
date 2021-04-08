@@ -35,6 +35,7 @@ def Application():
     Accueil_Cl = Accueil_Client() #attention elle n'a aucun boutons pour l'instant
     Liste_Ad = Liste_Admin()
     Liste_Li = Liste_Lieux()
+    Liste_Et = Liste_Etape()
     
     #initialisation des boutons d'interaction entre les pages
     #butons Logins
@@ -52,7 +53,7 @@ def Application():
     administrateurs_a_a.pack()
     circuits_a_a = tk.Button(master=Accueil_Ad.buton, text="Listes Circuits")
     circuits_a_a.pack()
-    etapes_a_a = tk.Button(master=Accueil_Ad.buton, text="Listes Etapes")
+    etapes_a_a = tk.Button(master=Accueil_Ad.buton, text="Listes Etapes", command= lambda: changement_page(Accueil_Ad, Liste_Et))
     etapes_a_a.pack()
     lieux_a_a = tk.Button(master=Accueil_Ad.buton, text="Listes Lieux", command= lambda: changement_page(Accueil_Ad, Liste_Li))
     lieux_a_a.pack()
@@ -64,9 +65,12 @@ def Application():
     #butons Liste Lieux
     retour_ll = tk.Button(master=Liste_Li.entete, text="Retour à la liste des pages", command= lambda: changement_page(Liste_Li, Accueil_Ad))
     retour_ll.pack()
+    #butons Liste Etape
+    retour_le = tk.Button(master=Liste_Et.entete, text="Retour à la liste des pages", command= lambda: changement_page(Liste_Et, Accueil_Ad))
+    retour_le.pack()
     #Fonctionnement
     #Login_page.affiche()
-    Liste_Li.affiche()
+    Liste_Et.affiche()
     ecran.mainloop()
     connexion.close()
 

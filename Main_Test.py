@@ -159,13 +159,20 @@ def update_lieu(ancien_nom, ancien_ville, ancien_pays, Nomlieu, Ville, Pays, Des
 
 def ajout_etape(IdCircuit, DateEtape, Duree, NomLieu, Ville, Pays): #testé
     base = connexion.cursor()
-
-    base.execute("insert into Etape(IdCircuit,DateEtape, Duree, NomLieu, Ville, Pays) values(?,?,?,?,?,?);",[IdCircuit, DateEtape, Duree, NomLieu, Ville, Pays])
+    #forcé l'ordre à être le plus petit possible
+    base.execute("select top 1 Ordre from Etape where IdCircuit = ? order by Ordre DESC;", [IdCircuit])
+    ligne_base = base.fetchone()
+    if ligne_base is None:
+        Ordre = 1 
+    else:
+        Ordre = ligne_base[0] +1
+    base.execute("insert into Etape(IdCircuit, Ordre, DateEtape, Duree, NomLieu, Ville, Pays) values(?,?,?,?,?,?,?);",[IdCircuit, Ordre, DateEtape, Duree, NomLieu, Ville, Pays])
+    #base.execute("update Etape set Ordre = ? where IdCircuit = ? and NomLieu = ? and Ville = ? and Pays = ?;", [Ordre, IdCircuit, NomLieu, Ville, Pays])
     base.close()
 
 def suprime_etape(Idcircuit, Ordre): #testé
     base = connexion.cursor()
-    base.execute("delete from Etape where Ordre = ? and IdCircuit = ?; Update Etape Set Ordre = Ordre - 1 where Ordre > ? and IdCircuit = ?;", [Idcircuit, Ordre, Idcircuit, Ordre])
+    base.execute("delete from Etape where Ordre = ? and IdCircuit = ?; Update Etape Set Ordre = Ordre - 1 where Ordre > ? and IdCircuit = ?;", [Ordre, Idcircuit, Ordre, Idcircuit])
     base.close()
 
 def ajout_groupe(Idpassager, Idreservation): #testé
@@ -303,26 +310,40 @@ def test_ajout():
     #print(conversion_datestring_dateliste("2020-11-03"))
 
     #ajout_reservation(11, 1, 0, "2022-11-05")
-    ajout_lieu('Chateau', 'Minima', 'France', 'Ce chateau est la première étape sur le chemin des minimes', 25.1)
-    update_lieu('Chateau', 'Minima', 'France', 'Chateau', 'Minima', 'Angleterre','Ce chateau est la première étape sur le chemin des minimes', 25.1)
-    #update_admin('gagaga', '212223', 'Tiberghien', 'Gaëtan', '1996-11-07', 'gaetan.tiberghien@epsi.fr', 14)
+    ajout_lieu('Chateau', 'Minima', 'Irac', 'Ce chateau est la première étape sur le chemin des minimes', 25.1)
+    #update_lieu('Chateau', 'Minima', 'France', 'Chateau', 'Minima', 'Angleterre','Ce chateau est la première étape sur le chemin des minimes', 25.1)
+    #ajout_circuit('Les minimes','Marseille','Strasbourg','France','France','2022-05-18',59,25,75.3)
     base = connexion.cursor()
+    base.execute("select top 1 IdCircuit from Circuit order by IdCircuit Desc")
+    ligne = base.fetchone()
+    Id = ligne.IdCircuit
+    base.close()
 
-    base.execute("select * from Lieu;")    
+    ajout_etape(Id,'2022-07-18', 2, 'Chateau', 'Minima', 'Irac')
+    base = connexion.cursor()
+    base.execute("select * from Etape;")    
     for ligne in base:
         for i in range(len(ligne)):
             print(ligne[i], end=' // ')
         print('')
     base.close()
-"""
+    """
+    #update_admin('gagaga', '212223', 'Tiberghien', 'Gaëtan', '1996-11-07', 'gaetan.tiberghien@epsi.fr', 14)
+    base = connexion.cursor()
+
+    base.execute("select top 1 IdCircuit from Circuit;")    
+    for ligne in base:
+        for i in range(len(ligne)):
+            print(ligne[i], end=' // ')
+        print('')
+    base.close()
+ 
     base.execute("select * from Personne;")    
     for ligne in base:
         for i in range(len(ligne)):
             print(ligne[i], end=' // ')
         print('')
-"""
-    
-"""
+
     ajout_circuit('Les minimes','Marseille','Strasbourg','France','France','2022-05-18',59,25,75.3)
     ajout_lieu('Chateau', 'Minima', 'France', 'Ce chateau est la première étape sur le chemin des minimes', 25.1)
 

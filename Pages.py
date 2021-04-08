@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter.ttk import *
 from Main_Test import *
 
 #Variable Global
@@ -693,7 +694,7 @@ class Liste_Etape():
         self.titre.pack_forget()
         self.buton.pack_forget()
         self.tableau.pack_forget()
-        #self.grand_buton_ajout.destroy()
+        self.grand_buton_ajout.destroy()
 
     def les_liste(self):
 
@@ -740,11 +741,109 @@ class Liste_Etape():
         ligne_nb = 1
         for ligne_base in base:
             self.circuit_list.append(tk.Label(master=self.tableau, text=ligne_base.IdCircuit))
-            self.circuit_list[0].grid(row=ligne_nb,column=0)
+            self.circuit_list[ligne_nb].grid(row=ligne_nb,column=0)
 
             self.ordre_list.append(tk.Label(master=self.tableau, text=ligne_base.Ordre))
-            self.ordre_list[0].grid(row=ligne_nb,column=0)
+            self.ordre_list[ligne_nb].grid(row=ligne_nb,column=1)
 
+            self.date_list.append(tk.Label(master=self.tableau, text=ligne_base.DateEtape))
+            self.date_list[ligne_nb].grid(row=ligne_nb,column=2)
+
+            self.duree_list.append(tk.Label(master=self.tableau, text=ligne_base.Duree))
+            self.duree_list[ligne_nb].grid(row=ligne_nb,column=3)
+
+            self.nom_list.append(tk.Label(master=self.tableau, text=ligne_base.NomLieu))
+            self.nom_list[ligne_nb].grid(row=ligne_nb,column=4)
+
+            self.ville_list.append(tk.Label(master=self.tableau, text=ligne_base.Ville))
+            self.ville_list[ligne_nb].grid(row=ligne_nb,column=5)
+
+            self.pays_list.append(tk.Label(master=self.tableau, text=ligne_base.Pays))
+            self.pays_list[ligne_nb].grid(row=ligne_nb,column=6)
+
+            self.suppr_list.append(tk.Button(master=self.tableau, text="Supprimer", command= lambda var_ligne = ligne_nb : self.Supprime(var_ligne, ligne_nb)))
+            self.suppr_list[ligne_nb].grid(row=ligne_nb,column=7)
+
+            self.modif_list.append(tk.Button(master=self.tableau, text="Modifier"))
+            self.modif_list[ligne_nb].grid(row=ligne_nb,column=8)
+            ligne_nb = ligne_nb + 1
         base.close()
-        self.grand_buton_ajout = tk.Button(master=self.buton, text= "Ajouter")#,command= lambda: self.Ajout_form(ligne_nb))
+        self.grand_buton_ajout = tk.Button(master=self.buton, text= "Ajouter",command= lambda: self.Ajout_form(ligne_nb))
         self.grand_buton_ajout.pack()
+
+    def Ajout_form(self, ligne):
+        base = connexion.cursor()
+        base.execute("select IdCircuit from Circuit;")
+        Ids = []
+        for ligne_base in base:
+            Ids.append(ligne_base.IdCircuit)
+        base.execute("select NomLieu, Ville, Pays from Lieu;")
+        Lieux = [[], [], []]
+        for ligne_base in base:
+            Lieux[0].append(ligne_base.NomLieu)
+            Lieux[1].append(ligne_base.Ville)
+            Lieux[2].append(ligne_base.Pays)
+        base.close()
+        
+        #on fait apparaître les Entrys
+        self.circuit_ajout = tk.ttk.Combobox(master=self.tableau, values = Ids)
+        self.circuit_ajout.grid(row=ligne,column=0)
+
+        self.ordre_ajout = tk.Label(master=self.tableau)
+        self.ordre_ajout.grid(row=ligne,column=1)
+
+        self.date_ajout = tk.Entry(master=self.tableau)
+        self.date_ajout.grid(row=ligne,column=2)
+
+        self.duree_ajout = tk.Entry(master=self.tableau)
+        self.duree_ajout.grid(row=ligne,column=3)
+
+        self.nom_ajout = tk.ttk.Combobox(master=self.tableau, values = Lieux[0])
+        self.nom_ajout.grid(row=ligne,column=4)
+
+        self.ville_ajout = tk.ttk.Combobox(master=self.tableau, values = Lieux[1])
+        self.ville_ajout.grid(row=ligne,column=5)
+
+        self.pays_ajout = tk.ttk.Combobox(master=self.tableau, values = Lieux[2])
+        self.pays_ajout.grid(row=ligne,column=6)
+
+        self.buton_ajout = tk.Button(master=self.tableau, text="Validation", command= lambda: self.Ajout_action())
+        self.buton_ajout.grid(row=ligne,column=7)
+
+    def Ajout_action(self):
+        print(self.ville_ajout.get())
+        Error = False
+        if not input_test_date(self.date_ajout.get()):
+            Error= True
+        try :
+            int(self.duree_ajout.get())
+        except:
+            Error= True
+        if not Error:
+            ajout_etape(self.circuit_ajout.get(), self.date_ajout.get(), self.duree_ajout.get(), self.nom_ajout.get(), self.ville_ajout.get(), self.pays_ajout.get())
+            connexion.commit()
+            self.circuit_ajout.grid_forget()
+            self.date_ajout.grid_forget()
+            self.duree_ajout.grid_forget()
+            self.nom_ajout.grid_forget()
+            self.ville_ajout.grid_forget()
+            self.pays_ajout.grid_forget()
+            self.buton_ajout.grid_forget()
+            self.cache()
+            self.affiche()
+
+    def Supprime(self, ligne, ligne_max):
+        suprime_etape(int(self.circuit_list[ligne].cget("text")), self.ordre_list[ligne].cget("text"))
+        connexion.commit()
+        for i in range(1,ligne_max):
+            self.circuit_list[i].grid_forget()
+            self.ordre_list[i].grid_forget()
+            self.date_list[i].grid_forget()
+            self.duree_list[i].grid_forget()
+            self.nom_list[i].grid_forget()
+            self.ville_list[i].grid_forget()
+            self.pays_list[i].grid_forget()
+            self.suppr_list[i].grid_forget()
+            self.modif_list[i].grid_forget()
+        self.cache()
+        self.affiche()
