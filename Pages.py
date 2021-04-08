@@ -599,6 +599,7 @@ class Liste_Lieux():
             Error= True
         if not Error:
             update_lieu(self.nom_list[ligne_nb].cget("text"),self.ville_list[ligne_nb].cget("text"),self.pays_list[ligne_nb].cget("text"),self.nom_modif.get(),self.ville_modif.get(),self.pays_modif.get(),self.descriptifs_modif.get(),float(self.prix_modif.get()))
+            connexion.commit()
             self.nom_modif.grid_forget()
             self.ville_modif.grid_forget()
             self.pays_modif.grid_forget()
@@ -609,7 +610,7 @@ class Liste_Lieux():
 
     def Supprime(self, ligne):
         supprime_lieu(self.nom_list[ligne].cget("text"), self.ville_list[ligne].cget("text"), self.pays_list[ligne].cget("text"))
-        
+        connexion.commit()
         self.nom_list[ligne].grid_forget()
         self.ville_list[ligne].grid_forget()
         self.pays_list[ligne].grid_forget()
@@ -656,7 +657,7 @@ class Liste_Lieux():
             Error= True
         if not Error:
             ajout_lieu(self.nom_ajout.get(), self.ville_ajout.get(), self.pays_ajout.get(), self.descriptifs_ajout.get(), float(self.prix_ajout.get()))
-            
+            connexion.commit()
             self.nom_ajout.grid_forget()
             self.ville_ajout.grid_forget()
             self.pays_ajout.grid_forget()
@@ -666,3 +667,84 @@ class Liste_Lieux():
             
             self.cache()
             self.affiche()
+
+
+class Liste_Etape():
+    def __init__(self):
+        self.entete = tk.Frame()
+        self.titre = tk.Frame()
+        self.buton = tk.Frame()
+        self.tableau = tk.Frame()
+        
+        self.titre_text = tk.Label(master=self.titre, text="Listes des Etapes")
+        self.titre_text.pack()
+
+    
+    def affiche(self):
+        self.les_liste()
+        self.lire_etape()
+        self.entete.pack()
+        self.titre.pack()
+        self.buton.pack()
+        self.tableau.pack()
+
+    def cache(self):
+        self.entete.pack_forget()
+        self.titre.pack_forget()
+        self.buton.pack_forget()
+        self.tableau.pack_forget()
+        #self.grand_buton_ajout.destroy()
+
+    def les_liste(self):
+
+        self.circuit_list =[]
+        self.circuit_list.append(tk.Label(master=self.tableau, text="Numéro du Circuit"))
+        self.circuit_list[0].grid(row=0,column=0)
+
+        self.ordre_list =[]
+        self.ordre_list.append(tk.Label(master=self.tableau, text="Ordre"))
+        self.ordre_list[0].grid(row=0,column=1)
+
+        self.date_list =[]
+        self.date_list.append(tk.Label(master=self.tableau, text="Date de Début"))
+        self.date_list[0].grid(row=0,column=2)
+
+        self.duree_list =[]
+        self.duree_list.append(tk.Label(master=self.tableau, text="Durée"))
+        self.duree_list[0].grid(row=0,column=3)
+
+        self.nom_list =[]
+        self.nom_list.append(tk.Label(master=self.tableau, text="Nom du Lieu"))
+        self.nom_list[0].grid(row=0,column=4)
+
+        self.ville_list =[]
+        self.ville_list.append(tk.Label(master=self.tableau, text="Ville"))
+        self.ville_list[0].grid(row=0,column=5)
+
+        self.pays_list =[]
+        self.pays_list.append(tk.Label(master=self.tableau, text="Pays"))
+        self.pays_list[0].grid(row=0,column=6)
+
+        self.suppr_list = []
+        self.suppr_list.append(tk.Label(master=self.tableau, text="Supprimer"))
+        self.suppr_list[0].grid(row=0,column=7)
+
+        self.modif_list = []
+        self.modif_list.append(tk.Label(master=self.tableau, text="Modifier"))
+        self.modif_list[0].grid(row=0,column=8)
+
+
+    def lire_etape(self):
+        base = connexion.cursor()
+        base.execute("select * from Etape;")
+        ligne_nb = 1
+        for ligne_base in base:
+            self.circuit_list.append(tk.Label(master=self.tableau, text=ligne_base.IdCircuit))
+            self.circuit_list[0].grid(row=ligne_nb,column=0)
+
+            self.ordre_list.append(tk.Label(master=self.tableau, text=ligne_base.Ordre))
+            self.ordre_list[0].grid(row=ligne_nb,column=0)
+
+        base.close()
+        self.grand_buton_ajout = tk.Button(master=self.buton, text= "Ajouter")#,command= lambda: self.Ajout_form(ligne_nb))
+        self.grand_buton_ajout.pack()
