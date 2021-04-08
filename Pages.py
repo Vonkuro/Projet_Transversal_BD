@@ -584,7 +584,28 @@ class Liste_Lieux():
         self.modif_modif.grid(row=ligne_nb, column=6)
 
     def modifier_enregistre(self, ligne_nb):
-        agir = "attendre" #écrire la fonction update_lieu
+        Error = False
+        if not input_test_text(self.nom_modif.get(), 24):
+            Error= True
+        if not input_test_text(self.ville_modif.get(), 24):
+            Error= True
+        if not input_test_text(self.pays_modif.get(), 24):
+            Error= True
+        if not input_test_text(self.descriptifs_modif.get(), 250):
+            Error= True
+        try :
+            float(self.prix_modif.get())
+        except:
+            Error= True
+        if not Error:
+            update_lieu(self.nom_list[ligne_nb].cget("text"),self.ville_list[ligne_nb].cget("text"),self.pays_list[ligne_nb].cget("text"),self.nom_modif.get(),self.ville_modif.get(),self.pays_modif.get(),self.descriptifs_modif.get(),float(self.prix_modif.get()))
+            self.nom_modif.grid_forget()
+            self.ville_modif.grid_forget()
+            self.pays_modif.grid_forget()
+            self.descriptifs_modif.grid_forget()
+            self.prix_modif.grid_forget()
+            self.cache()
+            self.affiche()
 
     def Supprime(self, ligne):
         supprime_lieu(self.nom_list[ligne].cget("text"), self.ville_list[ligne].cget("text"), self.pays_list[ligne].cget("text"))

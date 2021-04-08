@@ -151,6 +151,12 @@ def miseajour_lieu(): #testé
     base.close()
     return Lieux_suprime
 
+def update_lieu(ancien_nom, ancien_ville, ancien_pays, Nomlieu, Ville, Pays, Descriptif, Prixvisite): #testé
+    base = connexion.cursor()
+    base.execute("Update Lieu set Nomlieu = ?, Ville = ?, Pays = ?, Descriptif = ?, Prixvisite = ? where Nomlieu = ? and Ville = ? and Pays = ?;",[Nomlieu, Ville, Pays, Descriptif, Prixvisite, ancien_nom, ancien_ville, ancien_pays])
+    base.close()
+
+
 def ajout_etape(IdCircuit, DateEtape, Duree, NomLieu, Ville, Pays): #testé
     base = connexion.cursor()
 
@@ -297,22 +303,25 @@ def test_ajout():
     #print(conversion_datestring_dateliste("2020-11-03"))
 
     #ajout_reservation(11, 1, 0, "2022-11-05")
-    update_admin('gagaga', '212223', 'Tiberghien', 'Gaëtan', '1996-11-07', 'gaetan.tiberghien@epsi.fr', 14)
+    ajout_lieu('Chateau', 'Minima', 'France', 'Ce chateau est la première étape sur le chemin des minimes', 25.1)
+    update_lieu('Chateau', 'Minima', 'France', 'Chateau', 'Minima', 'Angleterre','Ce chateau est la première étape sur le chemin des minimes', 25.1)
+    #update_admin('gagaga', '212223', 'Tiberghien', 'Gaëtan', '1996-11-07', 'gaetan.tiberghien@epsi.fr', 14)
     base = connexion.cursor()
 
-    base.execute("select * from Administrateur;")    
+    base.execute("select * from Lieu;")    
     for ligne in base:
         for i in range(len(ligne)):
             print(ligne[i], end=' // ')
         print('')
-
+    base.close()
+"""
     base.execute("select * from Personne;")    
     for ligne in base:
         for i in range(len(ligne)):
             print(ligne[i], end=' // ')
         print('')
-
-    base.close()
+"""
+    
 """
     ajout_circuit('Les minimes','Marseille','Strasbourg','France','France','2022-05-18',59,25,75.3)
     ajout_lieu('Chateau', 'Minima', 'France', 'Ce chateau est la première étape sur le chemin des minimes', 25.1)
