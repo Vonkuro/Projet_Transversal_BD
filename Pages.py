@@ -764,7 +764,7 @@ class Liste_Etape():
             self.suppr_list.append(tk.Button(master=self.tableau, text="Supprimer", command= lambda var_ligne = ligne_nb : self.Supprime(var_ligne, ligne_nb)))
             self.suppr_list[ligne_nb].grid(row=ligne_nb,column=7)
 
-            self.modif_list.append(tk.Button(master=self.tableau, text="Modifier"))
+            self.modif_list.append(tk.Button(master=self.tableau, text="Modifier", command=lambda var_ligne = ligne_nb : self.modifier_active(var_ligne)))
             self.modif_list[ligne_nb].grid(row=ligne_nb,column=8)
             ligne_nb = ligne_nb + 1
         base.close()
@@ -847,3 +847,41 @@ class Liste_Etape():
             self.modif_list[i].grid_forget()
         self.cache()
         self.affiche()
+
+    def modifier_active(self, ligne_nb):
+        self.date_list[ligne_nb].grid_forget()
+        self.duree_list[ligne_nb].grid_forget()
+        self.modif_list[ligne_nb].grid_forget()
+        self.suppr_list[ligne_nb].grid_forget()
+
+        self.date_modif = tk.Entry(master=self.tableau)
+        self.date_modif.insert(0, self.date_list[ligne_nb].cget("text"))
+        self.date_modif.grid(row=ligne_nb, column=2)
+
+        self.duree_modif = tk.Entry(master=self.tableau)
+        self.duree_modif.insert(0, self.duree_list[ligne_nb].cget("text"))
+        self.duree_modif.grid(row=ligne_nb, column=3)
+
+        self.suppr_modif = tk.Label(master=self.tableau, text="Supprimer")
+        self.suppr_modif.grid(row=ligne_nb, column=7)
+
+        self.modif_modif = tk.Button(master=self.tableau, text="Modifier",command=lambda : self.modifier_enregistre(ligne_nb))
+        self.modif_modif.grid(row=ligne_nb, column=8)
+
+    def modifier_enregistre(self, ligne_nb):
+        Error = False
+        if not input_test_date(self.date_modif.get()):
+            Error = True
+        try :
+            int(self.duree_modif.get())
+        except:
+            Error= True
+        if not Error:
+            update_etape(self.circuit_list[ligne_nb].cget("text"), self.ordre_list[ligne_nb].cget("text"),self.date_modif.get(),self.duree_modif.get())
+
+            self.date_modif.grid_forget()
+            self.duree_modif.grid_forget()
+            self.modif_modif.grid_forget()
+            self.suppr_modif.grid_forget()
+            self.cache()
+            self.affiche()

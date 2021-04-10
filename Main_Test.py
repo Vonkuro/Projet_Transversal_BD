@@ -175,6 +175,11 @@ def suprime_etape(Idcircuit, Ordre): #testé
     base.execute("delete from Etape where Ordre = ? and IdCircuit = ?; Update Etape Set Ordre = Ordre - 1 where Ordre > ? and IdCircuit = ?;", [Ordre, Idcircuit, Ordre, Idcircuit])
     base.close()
 
+def update_etape(Idcircuit, Ordre, Date, Duree):
+    base = connexion.cursor()
+    base.execute("update Etape set DateEtape = ? , Duree = ? where IdCircuit = ? and Ordre = ?;",[Date, Duree, Idcircuit, Ordre])
+    base.close()
+
 def ajout_groupe(Idpassager, Idreservation): #testé
     base = connexion.cursor()
     base.execute("insert into Groupe(IdPersonne, IdReservation, Confirmation) values(?,?,?);",[Idpassager, Idreservation, 0])
