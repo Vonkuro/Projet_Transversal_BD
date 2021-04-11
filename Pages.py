@@ -319,6 +319,8 @@ class Liste_Admin():
         self.tableau.pack()
 
     def cache(self):
+        for widget in self.tableau.winfo_children():
+            widget.destroy()
         self.entete.pack_forget()
         self.titre.pack_forget()
         self.buton.pack_forget()
@@ -480,6 +482,8 @@ class Liste_Lieux():
         self.tableau.pack()
 
     def cache(self):
+        for widget in self.tableau.winfo_children():
+            widget.destroy()
         self.entete.pack_forget()
         self.titre.pack_forget()
         self.buton.pack_forget()
@@ -690,6 +694,8 @@ class Liste_Etape():
         self.tableau.pack()
 
     def cache(self):
+        for widget in self.tableau.winfo_children():
+            widget.destroy()
         self.entete.pack_forget()
         self.titre.pack_forget()
         self.buton.pack_forget()
@@ -906,6 +912,8 @@ class Liste_Client():
         self.tableau.pack()
 
     def cache(self):
+        for widget in self.tableau.winfo_children():
+            widget.destroy()
         self.entete.pack_forget()
         self.titre.pack_forget()
         self.buton.pack_forget()
@@ -989,6 +997,7 @@ class Liste_Client():
 
     def Supprime(self, ligne, ligne_max):
         supprime_client(self.Id_list[ligne])
+        connexion.commit()
         for i in range(1,ligne_max):
             self.nom_list[i].destroy()
             self.prenom_list[i].destroy()
@@ -1042,7 +1051,7 @@ class Liste_Client():
             Error= True
         if not Error:
             update_client_admin(self.nom_modif.get(), self.prenom_modif.get(), self.date_modif.get(), self.mail_modif.get(), self.Id_list[ligne-1])
-            #connexion.commit()
+            connexion.commit()
             #forget les entrys et recharge la page
             self.nom_modif.grid_forget()
             self.prenom_modif.grid_forget()
@@ -1050,3 +1059,283 @@ class Liste_Client():
             self.mail_modif.grid_forget()
             self.cache()
             self.affiche()
+
+class Liste_Circuit():
+    def __init__(self):
+        self.entete = tk.Frame()
+        self.titre = tk.Frame()
+        self.buton = tk.Frame()
+        self.tableau = tk.Frame()
+        
+        self.titre_text = tk.Label(master=self.titre, text="Listes des Circuit")
+        self.titre_text.pack()
+
+    
+    def affiche(self):
+        self.les_liste()
+        self.lire_circuit()
+        self.entete.pack()
+        self.titre.pack()
+        self.buton.pack()
+        self.tableau.pack()
+
+    def cache(self):
+        for widget in self.tableau.winfo_children():
+            widget.destroy()
+        self.entete.pack_forget()
+        self.titre.pack_forget()
+        self.buton.pack_forget()
+        self.tableau.pack_forget()
+        self.grand_buton_ajout.destroy()
+
+    def les_liste(self):
+        self.Id_list = []
+        self.Id_list.append(tk.Label(master=self.tableau, text="Numéro du Circuit"))
+        self.Id_list[0].grid(row=0, column=0)
+
+        self.descriptif_list = []
+        self.descriptif_list.append(tk.Label(master=self.tableau, text="Description"))
+        self.descriptif_list[0].grid(row=0, column=1)
+
+        self.ville_depart_list = []
+        self.ville_depart_list.append(tk.Label(master=self.tableau, text="Ville de Départ"))
+        self.ville_depart_list[0].grid(row=0, column=2)
+
+        self.ville_arrivee_list = []
+        self.ville_arrivee_list.append(tk.Label(master=self.tableau, text="Ville d'Arrivée"))
+        self.ville_arrivee_list[0].grid(row=0, column=3)
+
+        self.pays_depart_list = []
+        self.pays_depart_list.append(tk.Label(master=self.tableau, text="Pays de Départ"))
+        self.pays_depart_list[0].grid(row=0, column=4)
+
+        self.pays_arrivee_list = []
+        self.pays_arrivee_list.append(tk.Label(master=self.tableau, text="Pays d'Arrivée"))
+        self.pays_arrivee_list[0].grid(row=0, column=5)
+
+        self.date_list = []
+        self.date_list.append(tk.Label(master=self.tableau, text="Date de Départ"))
+        self.date_list[0].grid(row=0, column=6)
+
+        self.places_list = []
+        self.places_list.append(tk.Label(master=self.tableau, text="Nombre de Place Disponible"))
+        self.places_list[0].grid(row=0, column=7)
+
+        self.duree_list = []
+        self.duree_list.append(tk.Label(master=self.tableau, text="Durée"))
+        self.duree_list[0].grid(row=0, column=8)
+
+        self.prix_list = []
+        self.prix_list.append(tk.Label(master=self.tableau, text="Prix d'Inscription"))
+        self.prix_list[0].grid(row=0, column=9)
+
+        self.detail_list = []
+        self.detail_list.append(tk.Label(master=self.tableau, text="Passagers"))
+        self.detail_list[0].grid(row=0, column=10)
+
+        self.suppr_list = []
+        self.suppr_list.append(tk.Label(master=self.tableau, text="Supprimer"))
+        self.suppr_list[0].grid(row=0, column=11)
+
+        self.modif_list = []
+        self.modif_list.append(tk.Label(master=self.tableau, text="Modifier"))
+        self.modif_list[0].grid(row=0, column=12)
+
+    def lire_circuit(self):
+        base = connexion.cursor()
+        base.execute("select * from Circuit;")
+        ligne_nb = 1
+        for ligne_base in base:
+            self.Id_list.append(tk.Label(master=self.tableau, text=ligne_base.IdCircuit))
+            self.Id_list[ligne_nb].grid(row=ligne_nb,column=0)
+
+            self.descriptif_list.append(tk.Label(master=self.tableau, text=ligne_base.Descriptif))
+            self.descriptif_list[ligne_nb].grid(row=ligne_nb,column=1)
+
+            self.ville_depart_list.append(tk.Label(master=self.tableau, text=ligne_base.VilleDepart))
+            self.ville_depart_list[ligne_nb].grid(row=ligne_nb,column=2)
+
+            self.ville_arrivee_list.append(tk.Label(master=self.tableau, text=ligne_base.VilleArrivee))
+            self.ville_arrivee_list[ligne_nb].grid(row=ligne_nb,column=3)
+
+            self.pays_depart_list.append(tk.Label(master=self.tableau, text=ligne_base.PaysDepart))
+            self.pays_depart_list[ligne_nb].grid(row=ligne_nb,column=4)
+
+            self.pays_arrivee_list.append(tk.Label(master=self.tableau, text=ligne_base.PaysArrivee))
+            self.pays_arrivee_list[ligne_nb].grid(row=ligne_nb,column=5)
+
+            self.date_list.append(tk.Label(master=self.tableau, text=ligne_base.DateDepart))
+            self.date_list[ligne_nb].grid(row=ligne_nb,column=6)
+
+            self.places_list.append(tk.Label(master=self.tableau, text=ligne_base.NbPlaceDisponible))
+            self.places_list[ligne_nb].grid(row=ligne_nb,column=7)
+
+            self.duree_list.append(tk.Label(master=self.tableau, text=ligne_base.Duree))
+            self.duree_list[ligne_nb].grid(row=ligne_nb,column=8)
+
+            self.prix_list.append(tk.Label(master=self.tableau, text=ligne_base.PrixInscription))
+            self.prix_list[ligne_nb].grid(row=ligne_nb,column=9)
+
+            self.detail_list.append(tk.Label(master=self.tableau, text="Details"))
+            self.detail_list[ligne_nb].grid(row=ligne_nb,column=10)
+
+            self.suppr_list.append(tk.Button(master=self.tableau, text="Supprimer", command= lambda var_ligne = ligne_nb : self.Supprime(var_ligne)))
+            self.suppr_list[ligne_nb].grid(row=ligne_nb,column=11)
+
+            self.modif_list.append(tk.Button(master=self.tableau, text="Modifier", command= lambda var_ligne = ligne_nb : self.modifier_active(var_ligne)))
+            self.modif_list[ligne_nb].grid(row=ligne_nb,column=12)
+            ligne_nb = ligne_nb +1
+        base.close()
+        self.grand_buton_ajout = tk.Button(master=self.buton, text= "Ajouter",command= lambda: self.Ajout_form(ligne_nb))
+        self.grand_buton_ajout.pack()
+
+    def Ajout_form(self, ligne_nb):
+        self.descriptif_ajout = tk.Entry(master=self.tableau)
+        self.descriptif_ajout.grid(row=ligne_nb,column=1)
+
+        self.ville_depart_ajout = tk.Entry(master=self.tableau)
+        self.ville_depart_ajout.grid(row=ligne_nb,column=2)
+
+        self.ville_arrivee_ajout = tk.Entry(master=self.tableau)
+        self.ville_arrivee_ajout.grid(row=ligne_nb,column=3)
+
+        self.pays_depart_ajout = tk.Entry(master=self.tableau)
+        self.pays_depart_ajout.grid(row=ligne_nb,column=4)
+
+        self.pays_arrivee_ajout = tk.Entry(master=self.tableau)
+        self.pays_arrivee_ajout.grid(row=ligne_nb,column=5)
+
+        self.date_ajout = tk.Entry(master=self.tableau)
+        self.date_ajout.grid(row=ligne_nb,column=6)
+
+        self.places_ajout = tk.Entry(master=self.tableau)
+        self.places_ajout.grid(row=ligne_nb,column=7)
+
+        self.duree_ajout = tk.Entry(master=self.tableau)
+        self.duree_ajout.grid(row=ligne_nb,column=8)
+
+        self.prix_ajout = tk.Entry(master=self.tableau)
+        self.prix_ajout.grid(row=ligne_nb,column=9)
+
+        self.buton_ajout = tk.Button(master=self.tableau, text="Validation", command= lambda: self.Ajout_action())
+        self.buton_ajout.grid(row=ligne_nb,column=10)
+
+    def Ajout_action(self):
+        Error = False
+        if not input_test_text(self.descriptif_ajout.get(), 200):
+            Error= True
+        if not input_test_text(self.ville_depart_ajout.get(), 24):
+            Error= True
+        if not input_test_text(self.ville_arrivee_ajout.get(), 24):
+            Error= True
+        if not input_test_text(self.pays_depart_ajout.get(), 24):
+            Error= True
+        if not input_test_text(self.pays_arrivee_ajout.get(), 24):
+            Error= True
+        if not input_test_date(self.date_ajout.get()):
+            Error= True
+        try :
+            int(self.places_ajout.get())
+            int(self.duree_ajout.get())
+            float(self.prix_ajout.get())
+        except:
+            Error= True
+        if not Error:
+            ajout_circuit(self.descriptif_ajout.get(), self.ville_depart_ajout.get(), self.ville_arrivee_ajout.get(), self.pays_depart_ajout.get(), self.pays_arrivee_ajout.get(), self.date_ajout.get(), self.places_ajout.get(), self.duree_ajout.get(), self.prix_ajout.get())
+            connexion.commit()
+            self.cache()
+            self.affiche()
+
+    def Supprime(self, ligne):
+        if supprime_circuit(int(self.Id_list[ligne].cget("text"))):
+            connexion.commit()
+            self.cache()
+            self.affiche()
+
+    def modifier_active(self, ligne_nb):
+        self.descriptif_list[ligne_nb].grid_forget()
+        self.ville_depart_list[ligne_nb].grid_forget()
+        self.ville_arrivee_list[ligne_nb].grid_forget()
+        self.pays_depart_list[ligne_nb].grid_forget()
+        self.pays_arrivee_list[ligne_nb].grid_forget()
+        self.date_list[ligne_nb].grid_forget()
+        self.places_list[ligne_nb].grid_forget()
+        self.duree_list[ligne_nb].grid_forget()
+        self.prix_list[ligne_nb].grid_forget()
+        self.detail_list[ligne_nb].grid_forget()
+        self.suppr_list[ligne_nb].grid_forget()
+        self.modif_list[ligne_nb].grid_forget()
+
+        #création des Entry
+        self.descriptif_modif = tk.Entry(master=self.tableau)
+        self.descriptif_modif.insert(0, self.descriptif_list[ligne_nb].cget("text"))
+        self.descriptif_modif.grid(row=ligne_nb,column=1)
+
+        self.ville_depart_modif = tk.Entry(master=self.tableau)
+        self.ville_depart_modif.insert(0, self.ville_depart_list[ligne_nb].cget("text"))
+        self.ville_depart_modif.grid(row=ligne_nb,column=2)
+
+        self.ville_arrivee_modif = tk.Entry(master=self.tableau)
+        self.ville_arrivee_modif.insert(0, self.ville_arrivee_list[ligne_nb].cget("text"))
+        self.ville_arrivee_modif.grid(row=ligne_nb,column=3)
+
+        self.pays_depart_modif = tk.Entry(master=self.tableau)
+        self.pays_depart_modif.insert(0, self.pays_depart_list[ligne_nb].cget("text"))
+        self.pays_depart_modif.grid(row=ligne_nb,column=4)
+
+        self.pays_arrivee_modif = tk.Entry(master=self.tableau)
+        self.pays_arrivee_modif.insert(0, self.pays_arrivee_list[ligne_nb].cget("text"))
+        self.pays_arrivee_modif.grid(row=ligne_nb,column=5)
+
+        self.date_modif = tk.Entry(master=self.tableau)
+        self.date_modif.insert(0, self.date_list[ligne_nb].cget("text"))
+        self.date_modif.grid(row=ligne_nb,column=6)
+
+        self.places_modif = tk.Entry(master=self.tableau)
+        self.places_modif.insert(0, self.places_list[ligne_nb].cget("text"))
+        self.places_modif.grid(row=ligne_nb,column=7)
+
+        self.duree_modif = tk.Entry(master=self.tableau)
+        self.duree_modif.insert(0, self.duree_list[ligne_nb].cget("text"))
+        self.duree_modif.grid(row=ligne_nb,column=8)
+
+        self.prix_modif = tk.Entry(master=self.tableau)
+        self.prix_modif.insert(0, self.prix_list[ligne_nb].cget("text"))
+        self.prix_modif.grid(row=ligne_nb,column=9)
+
+        self.detail_modif = tk.Label(master=self.tableau, text="Details")
+        self.detail_modif.grid(row=ligne_nb,column=10)
+        
+        self.suppr_modif = tk.Label(master=self.tableau, text="Supprimer")
+        self.suppr_modif.grid(row=ligne_nb,column=11)
+        
+        self.modif_modif = tk.Button(master=self.tableau, text="Modifier", command= lambda: self.modifier_enregistre(ligne_nb))
+        self.modif_modif.grid(row=ligne_nb,column=12)
+
+    def modifier_enregistre(self, ligne):
+        Error = False
+        if not input_test_text(self.descriptif_modif.get(), 200):
+            Error= True
+        if not input_test_text(self.ville_depart_modif.get(), 24):
+            Error= True
+        if not input_test_text(self.ville_arrivee_modif.get(), 24):
+            Error= True
+        if not input_test_text(self.pays_depart_modif.get(), 24):
+            Error= True
+        if not input_test_text(self.pays_arrivee_modif.get(), 24):
+            Error= True
+        if not input_test_date(self.date_modif.get()):
+            Error= True
+        try :
+            int(self.places_modif.get())
+            int(self.duree_modif.get())
+            float(self.prix_modif.get())
+        except:
+            Error= True
+        if not Error:
+            update_circuit(self.Id_list[ligne].cget("text"),self.descriptif_modif.get(),self.ville_depart_modif.get(),self.ville_arrivee_modif.get(),self.pays_depart_modif.get(),self.pays_arrivee_modif.get(),self.date_modif.get(),self.places_modif.get(),self.duree_modif.get(),self.prix_modif.get())
+            connexion.commit()
+            self.cache()
+            self.affiche()
+
+#class Liste_Passager():

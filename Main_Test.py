@@ -284,6 +284,17 @@ def supprime_circuit(Idcircuit): #testé
     base.close()
     return 0
 
+def supprime_reservation_circuit(Idcircuit): #en cour
+    #supprime les reservations | à faire si temps
+    base = connexion.cursor()
+
+    base.close()
+
+def update_circuit(Idcircuit, Descriptif, Villedepart, Villearrivee, Paysdepart, Paysarrivee, Datedepart, Nbplacedisponible, Duree, Prixinscription):
+    base = connexion.cursor()
+    base.execute("update Circuit set Descriptif = ? , VilleDepart = ? , VilleArrivee = ? , PaysDepart = ? , PaysArrivee = ? , DateDepart = ? , NbPlaceDisponible = ? , Duree = ? , PrixInscription = ? where IdCircuit = ?;",[Descriptif, Villedepart, Villearrivee, Paysdepart, Paysarrivee, Datedepart, Nbplacedisponible, Duree, Prixinscription, Idcircuit])
+    base.close()
+
 def input_test_text(string, taille): #testé
     if len(string) > taille and len(string) != 0:
         return False
