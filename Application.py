@@ -36,6 +36,8 @@ def Application():
     Liste_Ad = Liste_Admin()
     Liste_Li = Liste_Lieux()
     Liste_Et = Liste_Etape()
+    Liste_Cl = Liste_Client()
+    Creation_Client_Admin = create_compte()
     
     #initialisation des boutons d'interaction entre les pages
     #butons Logins
@@ -47,7 +49,7 @@ def Application():
     cree = tk.Button(master=Creation_Client.buton, text="créer", command= lambda: appel_envois(Creation_Client, Login_page))
     cree.pack()
     #butons Accueil Admin
-    clients_a_a = tk.Button(master=Accueil_Ad.buton, text="Listes Clients")
+    clients_a_a = tk.Button(master=Accueil_Ad.buton, text="Listes Clients", command= lambda: changement_page(Accueil_Ad, Liste_Cl))
     clients_a_a.pack()
     administrateurs_a_a  = tk.Button(master=Accueil_Ad.buton, text="Listes Administrateurs", command= lambda: changement_page(Accueil_Ad, Liste_Ad))
     administrateurs_a_a.pack()
@@ -68,9 +70,17 @@ def Application():
     #butons Liste Etape
     retour_le = tk.Button(master=Liste_Et.entete, text="Retour à la liste des pages", command= lambda: changement_page(Liste_Et, Accueil_Ad))
     retour_le.pack()
+    #butons Liste Client
+    retour_lc = tk.Button(master=Liste_Cl.entete, text="Retour à la liste des pages", command= lambda: changement_page(Liste_Cl, Accueil_Ad))
+    retour_lc.pack()
+    compte_lc = tk.Button(master=Liste_Cl.buton, text="Ajouter un Client", command= lambda: changement_page(Liste_Cl, Creation_Client_Admin))
+    compte_lc.pack()
+    #butons Création de compte Client par Admin
+    cree_admin = tk.Button(master=Creation_Client_Admin.buton, text="créer", command= lambda: appel_envois(Creation_Client_Admin, Liste_Cl))
+    cree_admin.pack()
     #Fonctionnement
     #Login_page.affiche()
-    Liste_Et.affiche()
+    Liste_Cl.affiche()
     ecran.mainloop()
     connexion.close()
 

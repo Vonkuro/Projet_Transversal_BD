@@ -39,6 +39,12 @@ def ajout_client(user, motsdepasse, nom, prenom, datenaissance, mail): #testé
 
     base.close()
 
+def update_client_admin(nom, prenom, datenaissance, mail, Id): #testé
+    #cette fonction met à jour les données clients sans modification des mots de passes
+    base = connexion.cursor()
+    base.execute("Update Personne set Nom = ?, Prenom = ?, DateNaissance = ?, Mail = ? where IdPersonne = ?;", [nom,prenom,datenaissance, mail, Id])
+    base.close()
+
 def ajout_admin(user, motsdepasse, nom, prenom, datenaissance, mail): #testé
     base = connexion.cursor()
     
@@ -175,7 +181,7 @@ def suprime_etape(Idcircuit, Ordre): #testé
     base.execute("delete from Etape where Ordre = ? and IdCircuit = ?; Update Etape Set Ordre = Ordre - 1 where Ordre > ? and IdCircuit = ?;", [Ordre, Idcircuit, Ordre, Idcircuit])
     base.close()
 
-def update_etape(Idcircuit, Ordre, Date, Duree):
+def update_etape(Idcircuit, Ordre, Date, Duree):#testé
     base = connexion.cursor()
     base.execute("update Etape set DateEtape = ? , Duree = ? where IdCircuit = ? and Ordre = ?;",[Date, Duree, Idcircuit, Ordre])
     base.close()

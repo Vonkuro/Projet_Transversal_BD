@@ -885,3 +885,168 @@ class Liste_Etape():
             self.suppr_modif.grid_forget()
             self.cache()
             self.affiche()
+
+class Liste_Client():
+    def __init__(self):
+        self.entete = tk.Frame()
+        self.titre = tk.Frame()
+        self.buton = tk.Frame()
+        self.tableau = tk.Frame()
+        
+        self.titre_text = tk.Label(master=self.titre, text="Listes des Clients")
+        self.titre_text.pack()
+
+    
+    def affiche(self):
+        self.les_liste()
+        self.lire_client()
+        self.entete.pack()
+        self.titre.pack()
+        self.buton.pack()
+        self.tableau.pack()
+
+    def cache(self):
+        self.entete.pack_forget()
+        self.titre.pack_forget()
+        self.buton.pack_forget()
+        self.tableau.pack_forget()
+        #self.grand_buton_ajout.destroy()
+
+    def les_liste(self):
+        
+        self.nom_list = []
+        self.nom_list.append(tk.Label(master=self.tableau, text="Nom"))
+        self.nom_list[0].grid(row=0, column=0)
+
+        self.prenom_list = []
+        self.prenom_list.append(tk.Label(master=self.tableau, text="Prenom"))
+        self.prenom_list[0].grid(row=0, column=1)
+
+        self.mail_list = []
+        self.mail_list.append(tk.Label(master=self.tableau, text="Mail"))
+        self.mail_list[0].grid(row=0, column=2)
+
+        self.date_list = []
+        self.date_list.append(tk.Label(master=self.tableau, text="Date de Naissance"))
+        self.date_list[0].grid(row=0, column=3)
+
+        self.circuits_list = []
+        self.circuits_list.append(tk.Label(master=self.tableau, text="Circuits Choisit"))
+        self.circuits_list[0].grid(row=0, column=4)
+
+        self.Id_list= []
+
+        self.suppr_list = []
+        self.suppr_list.append(tk.Label(master=self.tableau, text="Supprimer"))
+        self.suppr_list[0].grid(row=0,column=5)
+
+        self.modif_list = []
+        self.modif_list.append(tk.Label(master=self.tableau, text="Modifier"))
+        self.modif_list[0].grid(row=0,column=6)
+
+    def lire_client(self):
+        base = connexion.cursor()
+        base.execute("select Client.IdPersonne, Nom, Prenom, DateNaissance, Mail from Personne inner join Client on Personne.IdPersonne = Client.IdPersonne;")
+        ligne_nb = 1
+        for ligne_base in base:
+            self.Id_list.append(ligne_base.IdPersonne)
+
+            self.nom_list.append(tk.Label(master=self.tableau, text=ligne_base.Nom))
+            self.nom_list[ligne_nb].grid(row=ligne_nb,column=0)
+
+            self.prenom_list.append(tk.Label(master=self.tableau, text=ligne_base.Prenom))
+            self.prenom_list[ligne_nb].grid(row=ligne_nb,column=1)
+
+            self.date_list.append(tk.Label(master=self.tableau, text=ligne_base.DateNaissance))
+            self.date_list[ligne_nb].grid(row=ligne_nb,column=3)
+
+            self.mail_list.append(tk.Label(master=self.tableau, text=ligne_base.Mail))
+            self.mail_list[ligne_nb].grid(row=ligne_nb,column=2)
+
+            self.circuits_list.append(tk.Frame(master=self.tableau))
+            self.circuits_list[ligne_nb].grid(row=ligne_nb,column=4)
+
+            self.suppr_list.append(tk.Button(master=self.tableau, text="Supprimer", command = lambda var_ligne = ligne_nb:self.Supprime(var_ligne, ligne_nb)))
+            self.suppr_list[ligne_nb].grid(row=ligne_nb,column=5)
+
+            self.modif_list.append(tk.Button(master=self.tableau, text="Modifier",command=lambda var_ligne = ligne_nb : self.modifier_active(var_ligne)))
+            self.modif_list[ligne_nb].grid(row=ligne_nb,column=6)
+            ligne_nb = ligne_nb + 1
+       
+        #self.grand_buton_ajout = tk.Button(master=self.buton, text= "Ajouter")#command= lambda: self.Ajout_form(ligne_nb)
+        #self.grand_buton_ajout.pack()
+        #maintenant les circuits
+        for ligne in range(ligne_nb-1):
+            base.execute("select IdCircuit from Reservation where IdPersonne = ?;", [self.Id_list[ligne]])
+            list_circuit = []
+            index = 0
+            for ligne_base in base:
+                list_circuit.append(tk.Label(master=self.circuits_list[ligne], text=ligne_base.IdCircuit))
+                list_circuit[index].pack()
+                index = index +1
+
+        base.close()
+
+    def Supprime(self, ligne, ligne_max):
+        supprime_client(self.Id_list[ligne])
+        for i in range(1,ligne_max):
+            self.nom_list[i].destroy()
+            self.prenom_list[i].destroy()
+            self.date_list[i].destroy()
+            self.mail_list[i].destroy()
+            self.circuits_list[i].destroy()
+            self.suppr_list[i].destroy()
+            self.modif_list[i].destroy()
+        self.cache()
+        self.affiche()
+    
+    def modifier_active(self, ligne):
+        self.nom_list[ligne].grid_forget()
+        self.prenom_list[ligne].grid_forget()
+        self.date_list[ligne].grid_forget()
+        self.mail_list[ligne].grid_forget()
+        self.modif_list[ligne].grid_forget()
+        self.suppr_list[ligne].grid_forget()
+
+        self.nom_modif = tk.Entry(master=self.tableau)
+        self.nom_modif.insert(0, self.nom_list[ligne].cget("text"))
+        self.nom_modif.grid(row=ligne, column=0)
+
+        self.prenom_modif = tk.Entry(master=self.tableau)
+        self.prenom_modif.insert(0, self.prenom_list[ligne].cget("text"))
+        self.prenom_modif.grid(row=ligne, column=1)
+
+        self.mail_modif = tk.Entry(master=self.tableau)
+        self.mail_modif.insert(0, self.mail_list[ligne].cget("text"))
+        self.mail_modif.grid(row=ligne, column=2)
+
+        self.date_modif = tk.Entry(master=self.tableau)
+        self.date_modif.insert(0, self.date_list[ligne].cget("text"))
+        self.date_modif.grid(row=ligne, column=3)  
+
+        self.suppr_modif = tk.Label(master=self.tableau, text="Supprimer")
+        self.suppr_modif.grid(row=ligne, column=5)
+
+        self.modif_modif = tk.Button(master=self.tableau, text="Modifier",command=lambda : self.modifier_enregistre(ligne))
+        self.modif_modif.grid(row=ligne, column=6)
+
+    def modifier_enregistre(self, ligne):
+        Error = False
+        if not input_test_text(self.nom_modif.get(), 24):
+            Error= True
+        if not input_test_text(self.prenom_modif.get(), 24):
+            Error= True
+        if not input_test_date(self.date_modif.get()):
+            Error= True
+        if not input_test_mail(self.mail_modif.get()):
+            Error= True
+        if not Error:
+            update_client_admin(self.nom_modif.get(), self.prenom_modif.get(), self.date_modif.get(), self.mail_modif.get(), self.Id_list[ligne-1])
+            #connexion.commit()
+            #forget les entrys et recharge la page
+            self.nom_modif.grid_forget()
+            self.prenom_modif.grid_forget()
+            self.date_modif.grid_forget()
+            self.mail_modif.grid_forget()
+            self.cache()
+            self.affiche()
