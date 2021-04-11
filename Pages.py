@@ -1176,7 +1176,7 @@ class Liste_Circuit():
             self.prix_list.append(tk.Label(master=self.tableau, text=ligne_base.PrixInscription))
             self.prix_list[ligne_nb].grid(row=ligne_nb,column=9)
 
-            self.detail_list.append(tk.Label(master=self.tableau, text="Details"))
+            self.detail_list.append(tk.Button(master=self.tableau, text="Details", command = lambda var_ligne = ligne_nb : self.detail(var_ligne)))
             self.detail_list[ligne_nb].grid(row=ligne_nb,column=10)
 
             self.suppr_list.append(tk.Button(master=self.tableau, text="Supprimer", command= lambda var_ligne = ligne_nb : self.Supprime(var_ligne)))
@@ -1188,6 +1188,11 @@ class Liste_Circuit():
         base.close()
         self.grand_buton_ajout = tk.Button(master=self.buton, text= "Ajouter",command= lambda: self.Ajout_form(ligne_nb))
         self.grand_buton_ajout.pack()
+
+    def detail(self, ligne):
+        Passagers = Liste_Passager(self.Id_list[ligne].cget("text"))
+        Passagers.affiche()
+
 
     def Ajout_form(self, ligne_nb):
         self.descriptif_ajout = tk.Entry(master=self.tableau)
@@ -1338,4 +1343,146 @@ class Liste_Circuit():
             self.cache()
             self.affiche()
 
-#class Liste_Passager():
+class Liste_Passager():
+    def __init__(self, Idcircuit):
+        self.ecran_secondaire = tk.Tk()
+        self.entete = tk.Frame(master=self.ecran_secondaire)
+        self.titre = tk.Frame(master=self.ecran_secondaire)
+        self.buton = tk.Frame(master=self.ecran_secondaire)
+        self.tableau = tk.Frame(master=self.ecran_secondaire)
+        
+        self.titre_text = tk.Label(master=self.titre, text="Listes des Passagers")
+        self.titre_text.pack()
+
+        self.Idcircuit = Idcircuit
+    
+    def retour(self):
+        self.ecran_secondaire.destroy()
+
+    def affiche(self):
+        self.les_liste()
+        self.lire_passager()
+        self.entete.pack()
+        self.titre.pack()
+        self.buton.pack()
+        self.tableau.pack()
+        self.ecran_secondaire.mainloop()
+
+    def cache(self):
+        for widget in self.tableau.winfo_children():
+            widget.destroy()
+        self.entete.pack_forget()
+        self.titre.pack_forget()
+        self.buton.pack_forget()
+        self.tableau.pack_forget()
+        #self.grand_buton_ajout.destroy()
+        self.grand_buton_retour.destroy()
+        self.Circuit.destroy()
+
+    def les_liste(self):
+        
+        self.nom_list = []
+        self.nom_list.append(tk.Label(master=self.tableau, text="Nom"))
+        self.nom_list[0].grid(row=0, column=0)
+
+        self.prenom_list = []
+        self.prenom_list.append(tk.Label(master=self.tableau, text="Prenom"))
+        self.prenom_list[0].grid(row=0, column=1)
+
+        self.date_list = []
+        self.date_list.append(tk.Label(master=self.tableau, text="Date de Naissance"))
+        self.date_list[0].grid(row=0, column=2)
+
+        self.Id_list= []
+        self.Id_list.append(0)
+
+        self.Idreservation_list = []
+        self.Idreservation_list.append(0)
+
+        self.Confirmation_list = []
+        self.Confirmation_list.append(0)
+
+        self.suppr_list = []
+        self.suppr_list.append(tk.Label(master=self.tableau, text="Supprimer"))
+        self.suppr_list[0].grid(row=0,column=3)
+
+        self.modif_list = []
+        self.modif_list.append(tk.Label(master=self.tableau, text="Annuler"))
+        self.modif_list[0].grid(row=0,column=4)
+
+    def lire_passager(self):
+        base = connexion.cursor()
+        base.execute("select Passager.IdPersonne, Nom, Prenom, DateNaissance, Confirmation, Reservation.IdReservation from Personne, Passager, Groupe, Reservation where Personne.IdPersonne = Passager.IdPersonne and Passager.IdPersonne = Groupe.IdPersonne and Reservation.IdReservation = Groupe.IdReservation and Reservation.IdCircuit = ?;",[self.Idcircuit])
+        ligne_nb = 1
+        for ligne_base in base:
+            self.Id_list.append(ligne_base.IdPersonne)
+            self.Idreservation_list.append(ligne_base.IdReservation)
+            self.Confirmation_list.append(ligne_base.Confirmation)
+
+            self.nom_list.append(tk.Label(master=self.tableau, text=ligne_base.Nom))
+            self.nom_list[ligne_nb].grid(row=ligne_nb,column=0)
+
+            self.prenom_list.append(tk.Label(master=self.tableau, text=ligne_base.Prenom))
+            self.prenom_list[ligne_nb].grid(row=ligne_nb,column=1)
+
+            self.date_list.append(tk.Label(master=self.tableau, text=ligne_base.DateNaissance))
+            self.date_list[ligne_nb].grid(row=ligne_nb,column=2)
+
+
+            self.suppr_list.append(tk.Button(master=self.tableau, text="Supprimer", command = lambda var_ligne = ligne_nb:self.Supprime(var_ligne)))
+            self.suppr_list[ligne_nb].grid(row=ligne_nb,column=3)
+
+            self.modif_list.append(tk.Button(master=self.tableau, text="Annuler", command = lambda var_ligne = ligne_nb:self.Annuler(var_ligne)))
+            self.modif_list[ligne_nb].grid(row=ligne_nb,column=4)
+            ligne_nb = ligne_nb + 1
+       
+        #self.grand_buton_ajout = tk.Button(master=self.buton, text= "Ajouter", command= lambda: self.Ajout_form(ligne_nb))
+        #self.grand_buton_ajout.pack()
+        self.grand_buton_retour =tk.Button(master=self.buton, text= "Retour aux Circuits", command= lambda: self.retour())
+        self.grand_buton_retour.grid(row=0, column=1)
+        message = "Circuit : " + str(self.Idcircuit)
+        self.Circuit = tk.Label(master=self.buton, text = message)
+        self.Circuit.grid(row=0, column=0)
+        base.close()
+
+    def Supprime(self, ligne):
+        supprime_groupe(self.Id_list[ligne],self.Idreservation_list[ligne])
+        connexion.commit()
+        self.cache()
+        self.affiche()
+    
+    def Annuler(self, ligne):
+        jour = datetime.date.today()
+        jour_string = jour.strftime("%Y-%m-%d")
+        annuler_groupe(self.Id_list[ligne],self.Idreservation_list[ligne], jour_string)
+        connexion.commit()
+        self.cache()
+        self.affiche()
+"""
+    def Ajout_form(self, ligne):
+        self.nom_ajout = tk.Entry(master=self.tableau)
+        self.nom_ajout.grid(row=ligne, column=0)
+
+        self.prenom_ajout = tk.Entry(master=self.tableau)
+        self.prenom_ajout.grid(row=ligne, column=1)
+
+        self.date_ajout = tk.Entry(master=self.tableau)
+        self.date_ajout.grid(row=ligne, column=2)
+
+        self.buton_ajout = tk.Button(master=self.tableau, text="Validation")
+        self.buton_ajout.grid(row=ligne, column=3)
+
+    def Ajout_action(self, ligne):
+        Error = False
+        if not input_test_text(self.nom_ajout.get(), 24):
+            Error= True
+        if not input_test_text(self.prenom_ajout.get(), 24):
+            Error= True
+        if not input_test_date(self.date_ajout.get()):
+            Error= True
+        if not Error:
+            identification_passager(self.nom_ajout.get(), self.prenom_ajout.get(), self.date_ajout.get())
+            #ajouter le passager à la reservation
+            self.cache()
+            self.affiche()
+"""

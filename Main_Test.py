@@ -290,12 +290,17 @@ def supprime_reservation_circuit(Idcircuit): #en cour
 
     base.close()
 
-def update_circuit(Idcircuit, Descriptif, Villedepart, Villearrivee, Paysdepart, Paysarrivee, Datedepart, Nbplacedisponible, Duree, Prixinscription):
+def update_circuit(Idcircuit, Descriptif, Villedepart, Villearrivee, Paysdepart, Paysarrivee, Datedepart, Nbplacedisponible, Duree, Prixinscription):#testé 
     base = connexion.cursor()
     base.execute("update Circuit set Descriptif = ? , VilleDepart = ? , VilleArrivee = ? , PaysDepart = ? , PaysArrivee = ? , DateDepart = ? , NbPlaceDisponible = ? , Duree = ? , PrixInscription = ? where IdCircuit = ?;",[Descriptif, Villedepart, Villearrivee, Paysdepart, Paysarrivee, Datedepart, Nbplacedisponible, Duree, Prixinscription, Idcircuit])
     base.close()
 
-def input_test_text(string, taille): #testé
+def supprime_groupe(Idpassager, Idreservation):#testé 
+    base = connexion.cursor()
+    base.execute("delete Groupe where IdPersonne = ? and IdReservation = ?;",[Idpassager, Idreservation])
+    base.close()
+
+def input_test_text(string, taille): #testé 
     if len(string) > taille and len(string) != 0:
         return False
     return True
