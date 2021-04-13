@@ -21,7 +21,11 @@ def Log_Out(Log, Actuelle):
     IdPersonne = 0
     changement_page(Actuelle, Log)
 
-
+def changement_vers_Pres_circuit(Accueil_Cl, Pres_Cir):
+    verif = Accueil_Cl.verification()
+    if verif :
+        Accueil_Cl.cache()
+        Pres_Cir.affiche(verif)
 
 #Main
 def Application():
@@ -39,6 +43,7 @@ def Application():
     Liste_Cl = Liste_Client()
     Creation_Client_Admin = create_compte()
     Liste_Ci = Liste_Circuit()
+    Pres_Cir = Presentation_Circuit()
     
     #initialisation des boutons d'interaction entre les pages
     #butons Logins
@@ -49,6 +54,8 @@ def Application():
     #butons Création de compte Client
     cree = tk.Button(master=Creation_Client.buton, text="créer", command= lambda: appel_envois(Creation_Client, Login_page))
     cree.pack()
+    retour_cc = tk.Button(master=Creation_Client.titre, text="Retour", command= lambda: changement_page(Creation_Client, Login_page))
+    retour_cc.pack()
     #butons Accueil Admin
     clients_a_a = tk.Button(master=Accueil_Ad.buton, text="Listes Clients", command= lambda: changement_page(Accueil_Ad, Liste_Cl))
     clients_a_a.pack()
@@ -82,9 +89,17 @@ def Application():
     #butons Liste Circuit
     retour_lci = tk.Button(master=Liste_Ci.entete, text="Retour à la liste des pages", command= lambda: changement_page(Liste_Ci, Accueil_Ad))
     retour_lci.pack()
+    #butons Accuiel Client
+    accueil_client_logout = tk.Button(master=Accueil_Cl.entete, text="log out", command= lambda: Log_Out(Login_page, Accueil_Cl))
+    accueil_client_logout.pack()
+    chercher_circuit = tk.Button(master=Accueil_Cl.buton, text="Voir les circuits disponibles", command= lambda: changement_vers_Pres_circuit(Accueil_Cl, Pres_Cir))
+    chercher_circuit.pack()
+    #butons Présentation des Circuits
+    retour_pc = tk.Button(master=Pres_Cir.entete, text="Retour à la liste des pages", command= lambda: changement_page(Pres_Cir, Accueil_Cl))
+    retour_pc.pack()
     #Fonctionnement
     #Login_page.affiche()
-    Liste_Ci.affiche()
+    Accueil_Cl.affiche()
     ecran.mainloop()
     connexion.close()
 

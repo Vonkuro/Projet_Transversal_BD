@@ -1,5 +1,7 @@
 from Connexsion import *
 import datetime
+from datetime import datetime  
+from datetime import timedelta 
 
 def verification_client(user, motsdepasse): #testé
     base = connexion.cursor()
@@ -331,6 +333,25 @@ def input_test_date(string): #testé
                 return False
     return False
 
+def trouve_circuit(liste_informations): #testé
+    base = connexion.cursor()
+    requette ="select PrixInscription + sum(Lieu.PrixVisite) as Prix_total, Circuit.IdCircuit, Circuit.DateDepart, Circuit.Duree"
+    requette += " from Circuit, Etape inner join Lieu on (Etape.Pays = Lieu.Pays and Etape.Ville = Lieu.ville and Etape.NomLieu = Lieu.NomLieu)"
+    requette +=" where Circuit.IdCircuit = Etape.IdCircuit"
+    requette +=" group by Circuit.PrixInscription, Circuit.IdCircuit, Circuit.DateDepart, Circuit.Duree;"
+    base.execute(requette)
+    date_depart_client = datetime.strptime(liste_informations[0], "%Y-%m-%d")
+    date_fin_client = datetime.strptime(liste_informations[1], "%Y-%m-%d")
+    liste_trouvee = []
+    for ligne_base in base:
+        if ligne_base.Prix_total <= liste_informations[2] :
+            date_depart = datetime.strptime(ligne_base.DateDepart, "%Y-%m-%d")
+            date_fin = date_depart + timedelta(days=ligne_base.Duree) 
+            if date_depart >= date_depart_client and date_fin <= date_fin_client:
+                liste_trouvee.append([ligne_base.IdCircuit, ligne_base.Prix_total])
+    
+    base.close()
+    return liste_trouvee
 
 def test_ajout():
 

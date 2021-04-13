@@ -9,7 +9,7 @@ IdPersonne = 0
 
 class Login():
     def __init__(self):
-        self.titre = tk.Frame(width=300, height=5000)#on donne à chaque frame une taille
+        self.titre = tk.Frame()
         self.formulaire = tk.Frame()
         self.buton = tk.Frame()
 
@@ -29,10 +29,7 @@ class Login():
         self.titre.pack()
         self.formulaire.pack()
         self.buton.pack()
-        #On rajoute la propriété propagate(0) afin que la frame ne s'adapte pas à ses wiglets
-        self.titre.propagate(0)
-        self.formulaire.propagate(0)
-        self.buton.propagate(0)
+        
     
     def verifications(self):
         global IdPersonne
@@ -185,6 +182,7 @@ class Accueil_Admin():
     def cache(self):
         self.titre.pack_forget()
         self.buton.pack_forget()
+    
 
 class Accueil_Client():
     def __init__(self):
@@ -227,6 +225,137 @@ class Accueil_Client():
         self.titre.pack_forget()
         self.formulaire.pack_forget()
         self.buton.pack_forget()
+
+    #Réfléxion : toujour une classe par écran, une fonction particulière par changement de page
+    def verification(self):
+        Error = False
+        if input_test_date(self.date_depart_en.get()):
+            Error =  True
+        if input_test_date(self.date_fin_en.get()):
+            Error =  True
+        try:
+            int(self.nombre_en.get())
+            float(self.budget_en.get())
+        except:
+            Error = True
+        if not Error:
+            return [self.date_depart_en.get(), self.date_fin_en.get(), float(self.budget_en.get()), int(self.nombre_en.get())]
+        else:
+            return False
+
+class Presentation_Circuit():
+    def __init__(self):
+        self.entete = tk.Frame()
+        self.titre = tk.Frame()
+        self.tableau = tk.Frame()
+        self.buton = tk.Frame()
+
+        self.titre_text =tk.Label(master=self.titre, text="Choisir un Circuit")
+        self.titre_text.pack()
+    
+    def affiche(self,liste_informations):
+        self.lire_circuit(liste_informations)
+        self.entete.pack()
+        self.titre.pack()
+        self.tableau.pack()
+        self.buton.pack()
+    
+    def cache(self):
+        for widget in self.tableau.winfo_children():
+            widget.destroy()
+        self.entete.pack_forget()
+        self.titre.pack_forget()
+        self.tableau.pack_forget()
+        self.buton.pack_forget()
+    
+    def lire_circuit(self, liste_informations):
+        #Les listes des trois colonnes
+        self.circuit_list = []
+        self.circuit_list.append(tk.Label(master=self.tableau, text="Circuits"))
+        self.circuit_list[0].grid(row=0,column=0)
+
+        self.prix_list = []
+        self.prix_list.append(tk.Label(master=self.tableau, text="Prix"))
+        self.prix_list[0].grid(row=0,column=1)
+
+        self.Id_list = [] #liste contenant les Id au même index que la description
+        self.Id_list.append(0)
+
+        self.select_list = []
+        self.select_list.append(tk.Label(master=self.tableau, text="Selectionner"))
+        self.select_list[0].grid(row=0,column=2)
+
+        #appel sql qui trouve circuit sous bugdet, après date début et avant date fin
+        liste_Id = trouve_circuit(liste_informations) #liste contenant les Id et les prix des circuits trouvés
+        base = connexion.cursor()
+        ligne_nb = 1
+        for Id in liste_Id:
+            base.execute("select * from Circuit where IdCircuit = ? and NbPlaceDisponible > 0;",[Id[0]])
+            ligne_base = base.fetchone()
+
+            self.Id_list.append(ligne_base.IdCircuit)
+
+            message = ligne_base.Descriptif + " depuis " + ligne_base.VilleDepart + " en " + ligne_base.PaysDepart
+            message += " jusqu'à " + ligne_base.VilleArrivee + " en " + ligne_base.PaysArrivee + ". Il reste "
+            message += str(ligne_base.NbPlaceDisponible) + " places. Le cicruit commence le " + ligne_base.DateDepart
+            message += " et durera " + str(ligne_base.Duree) + " jours."
+            self.circuit_list.append(tk.Label(master=self.tableau, text=message))
+            self.circuit_list[ligne_nb].grid(row=ligne_nb, column= 0)
+
+            self.prix_list.append(tk.Label(master=self.tableau, text=Id[1]))
+            self.prix_list[ligne_nb].grid(row=ligne_nb, column= 1)
+
+            self.select_list.append(tk.Button(master=self.tableau, text="Selectionner"))
+            self.select_list[ligne_nb].grid(row=ligne_nb, column= 2)
+        base.close()
+
+class Presentation_Etape():
+    def __init__(self):
+        self.entete = tk.Frame()
+        self.titre = tk.Frame()
+        self.tableau = tk.Frame()
+        self.buton = tk.Frame()
+
+        self.titre_text =tk.Label(master=self.titre, text="Choisir un Circuit")
+        self.titre_text.pack()
+        
+    
+    def affiche(self,idcircuit):
+        #self.lire_etape(idcircuit)
+        self.entete.pack()
+        self.titre.pack()
+        self.tableau.pack()
+        self.buton.pack()
+    
+    def cache(self):
+        for widget in self.tableau.winfo_children():
+            widget.destroy()
+        self.entete.pack_forget()
+        self.titre.pack_forget()
+        self.tableau.pack_forget()
+        self.buton.pack_forget()
+    
+    def lire_etape(self, idcircuit):
+        #les listes
+        message = "Circuit " + str(idcircuit) + " :"
+        self.circuit_titre = tk.Label(master=self.tableau, text=message)
+        self.circuit_titre.grid(row=0,column=0)
+
+        self.ordre_list = []
+        self.nom_list = []
+        self.ville_list = []
+        self.pays_list = []
+        self.descriptif_list = []
+        self.date_list = []
+        self.duree_list =[]
+        #sql
+        base = connexion.cursor()
+        ligne_nb = 1
+        base.execute("select Order, DateEtape, Duree, Descriptif, Etape.NomLieu, Etape.Ville, Etape.Pays from Etape, Lieu on where IdCircuit = ? and Etape.NomLieu = Lieu.NomLieu and Etape.Ville = Lieu.Ville and Etape.Pays = Lieu.Pays;",[idcircuit])
+        for ligne_base in base:
+            attendre = 1
+
+
 
 class Liste_Admin():
     def __init__(self):
