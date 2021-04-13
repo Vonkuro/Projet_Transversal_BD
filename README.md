@@ -3,7 +3,7 @@
 soutenance 20 avril
 dossier à rendre une semaine avant : le 19 avril
 
-Requettes sql dans Pages.py
+Les 11 Requettes sql dans Pages.py. Il y a 57 requettes dans Main_Test.py.
 
 "select * from Circuit where IdCircuit = ? and NbPlaceDisponible > 0;"
 
