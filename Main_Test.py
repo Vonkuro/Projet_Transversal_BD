@@ -303,7 +303,7 @@ def supprime_groupe(Idpassager, Idreservation):#testé
     base.close()
 
 def input_test_text(string, taille): #testé 
-    if len(string) > taille and len(string) != 0:
+    if len(string) < taille and len(string) != 0:
         return False
     return True
 

@@ -22,10 +22,17 @@ def Log_Out(Log, Actuelle):
     changement_page(Actuelle, Log)
 
 def changement_vers_Pres_circuit(Accueil_Cl, Pres_Cir):
-    verif = Accueil_Cl.verification()
-    if verif :
+    
+    if Accueil_Cl.verification() :
         Accueil_Cl.cache()
-        Pres_Cir.affiche(verif)
+        Pres_Cir.affiche()
+
+def changement_vers_Pres_etape(Pres_Cir, Pres_Et): #à corriger pour ne pas caché si Id =0
+    Id = Pres_Cir.cache()
+    if Id != 0:
+        Pres_Et.affiche()
+    else:
+        Pres_Cir.affiche()
 
 #Main
 def Application():
@@ -44,6 +51,8 @@ def Application():
     Creation_Client_Admin = create_compte()
     Liste_Ci = Liste_Circuit()
     Pres_Cir = Presentation_Circuit()
+    Pres_Et = Presentation_Etape()
+    Res_Pa = Reservation_passager()
     
     #initialisation des boutons d'interaction entre les pages
     #butons Logins
@@ -95,11 +104,21 @@ def Application():
     chercher_circuit = tk.Button(master=Accueil_Cl.buton, text="Voir les circuits disponibles", command= lambda: changement_vers_Pres_circuit(Accueil_Cl, Pres_Cir))
     chercher_circuit.pack()
     #butons Présentation des Circuits
-    retour_pc = tk.Button(master=Pres_Cir.entete, text="Retour à la liste des pages", command= lambda: changement_page(Pres_Cir, Accueil_Cl))
+    retour_pc = tk.Button(master=Pres_Cir.entete, text="Retour à l'Accueil", command= lambda: changement_page(Pres_Cir, Accueil_Cl))
     retour_pc.pack()
+    etapes_pc = tk.Button(master=Pres_Cir.entete, text="Détails du Circuit Selectionné", command= lambda: changement_vers_Pres_etape(Pres_Cir, Pres_Et))
+    etapes_pc.pack()
+    #butons Présentation des Etapes
+    retour_pe = tk.Button(master=Pres_Et.entete, text="Retour à la Selection", command= lambda: changement_page(Pres_Et, Pres_Cir))
+    retour_pe.pack()
+    reserve_pe =tk.Button(master=Pres_Et.buton, text="Reserver", command= lambda: changement_page(Pres_Et, Res_Pa))
+    reserve_pe.pack()
+    #butons Reservation des passagers
+    retour_rp = tk.Button(master=Res_Pa.buton_2, text="Retour à l'Accueil'", command= lambda: changement_page(Res_Pa, Accueil_Cl))
+    retour_rp.pack()
     #Fonctionnement
-    #Login_page.affiche()
-    Accueil_Cl.affiche()
+    Login_page.affiche()
+    #Accueil_Cl.affiche()
     ecran.mainloop()
     connexion.close()
 

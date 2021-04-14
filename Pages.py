@@ -2,9 +2,11 @@ import tkinter as tk
 from tkinter.ttk import *
 from Main_Test import *
 
-#Variable Global
+#Variables Globals
 IdPersonne = 0
-
+liste_informations = [] #date départ, date fin, budget et nombre de place
+IdCircuit = 0
+IdReservation = 0
 
 
 class Login():
@@ -215,6 +217,12 @@ class Accueil_Client():
         self.nombre_en.pack()
     
     def affiche(self):
+        global liste_informations
+        liste_informations = []
+        global IdCircuit
+        IdCircuit = 0
+        global IdReservation
+        IdReservation = 0
         self.entete.pack()
         self.titre.pack()
         self.formulaire.pack()
@@ -239,7 +247,9 @@ class Accueil_Client():
         except:
             Error = True
         if not Error:
-            return [self.date_depart_en.get(), self.date_fin_en.get(), float(self.budget_en.get()), int(self.nombre_en.get())]
+            global liste_informations
+            liste_informations = [self.date_depart_en.get(), self.date_fin_en.get(), float(self.budget_en.get()), int(self.nombre_en.get())]
+            return True
         else:
             return False
 
@@ -252,13 +262,18 @@ class Presentation_Circuit():
 
         self.titre_text =tk.Label(master=self.titre, text="Choisir un Circuit")
         self.titre_text.pack()
+        self.Choix_Circuit = 0
+        self.nombre_place = 0
     
-    def affiche(self,liste_informations):
+    def affiche(self):
+        global liste_informations
+        self.Choix_Circuit = 0
+        self.nombre_place = liste_informations[3]
         self.lire_circuit(liste_informations)
         self.entete.pack()
         self.titre.pack()
-        self.tableau.pack()
         self.buton.pack()
+        self.tableau.pack()
     
     def cache(self):
         for widget in self.tableau.winfo_children():
@@ -267,6 +282,9 @@ class Presentation_Circuit():
         self.titre.pack_forget()
         self.tableau.pack_forget()
         self.buton.pack_forget()
+        global IdCircuit
+        IdCircuit = self.Choix_Circuit
+        return self.Choix_Circuit
     
     def lire_circuit(self, liste_informations):
         #Les listes des trois colonnes
@@ -305,9 +323,15 @@ class Presentation_Circuit():
             self.prix_list.append(tk.Label(master=self.tableau, text=Id[1]))
             self.prix_list[ligne_nb].grid(row=ligne_nb, column= 1)
 
-            self.select_list.append(tk.Button(master=self.tableau, text="Selectionner"))
+            self.select_list.append(tk.Button(master=self.tableau, text="Selectionner", command= lambda var_ligne = ligne_nb : self.Choix(var_ligne)))
             self.select_list[ligne_nb].grid(row=ligne_nb, column= 2)
         base.close()
+
+    def Choix(self,ligne):
+        self.Choix_Circuit = self.Id_list[ligne]
+        for i in range(1,len(self.select_list)):
+            self.select_list[i].configure(relief='raised')
+        self.select_list[ligne].configure(relief='sunken')
 
 class Presentation_Etape():
     def __init__(self):
@@ -318,10 +342,85 @@ class Presentation_Etape():
 
         self.titre_text =tk.Label(master=self.titre, text="Choisir un Circuit")
         self.titre_text.pack()
+        self.Id = 0
+    
+    def affiche(self):
+        self.lire_etape()
+        self.entete.pack()
+        self.titre.pack()
+        self.tableau.pack()
+        self.buton.pack()
+    
+    def cache(self):
+        self.reservation()
+        for widget in self.tableau.winfo_children():
+            widget.destroy()
+        self.entete.pack_forget()
+        self.titre.pack_forget()
+        self.tableau.pack_forget()
+        self.buton.pack_forget()
         
     
-    def affiche(self,idcircuit):
-        #self.lire_etape(idcircuit)
+    def lire_etape(self):
+        #les listes
+        global IdCircuit
+        message = "Circuit " + str(IdCircuit) + " :"
+        self.circuit_titre = tk.Label(master=self.tableau, text=message)
+        self.circuit_titre.grid(row=0,column=0)
+
+        self.ordre_list = []
+        self.ordre_list.append(0)
+
+        self.lieu_list = []
+        self.lieu_list.append(0)
+
+        self.descriptif_list = []
+        self.descriptif_list.append(0)
+
+        #sql
+        base = connexion.cursor()
+        ligne_nb = 1
+        base.execute("select Ordre, DateEtape, Duree, Descriptif, Etape.NomLieu, Etape.Ville, Etape.Pays from Etape, Lieu where IdCircuit = ? and Etape.NomLieu = Lieu.NomLieu and Etape.Ville = Lieu.Ville and Etape.Pays = Lieu.Pays;",[IdCircuit])
+        for ligne_base in base:
+            message = "Etape n°" + str(ligne_base.Ordre)
+            self.ordre_list.append(tk.Label(master=self.tableau, text=message))
+            self.ordre_list[ligne_nb].grid(row = ligne_nb, column= 0)
+            #Nom en Ville, Pays le Date pour Duree jours. | Description
+            message = ligne_base.NomLieu + " en " + ligne_base.Ville + ", " + ligne_base.Pays + " le " + ligne_base.DateEtape + " pour " + str(ligne_base.Duree) + " jours."
+            self.lieu_list.append(tk.Label(master=self.tableau, text= message))
+            self.lieu_list[ligne_nb].grid(row = ligne_nb, column= 1)
+
+            self.descriptif_list.append(tk.Label(master=self.tableau, text=ligne_base.Descriptif))
+            self.descriptif_list[ligne_nb].grid(row = ligne_nb, column= 2)
+            ligne_nb += 1
+        base.close()
+
+    def reservation(self):
+        global IdPersonne
+        global liste_informations
+        today = datetime.today()
+        aujourdhuis = today.strftime("%Y-%m-%d")
+        ajout_reservation(IdPersonne, IdCircuit, liste_informations[3], aujourdhuis)
+        base = connexion.cursor()
+        base.execute("select IdReservation from Reservation where IdPersonne = ? and IdCircuit = ? and DateRevervation = ?;",[IdPersonne,IdCircuit,aujourdhuis])
+        ligne_base = base.fetchone()
+        global IdReservation
+        IdReservation = ligne_base.IdReservation
+        base.close()
+
+class Reservation_passager():
+    def __init__(self):
+        self.entete = tk.Frame()
+        self.titre = tk.Frame()
+        self.tableau = tk.Frame()
+        self.buton = tk.Frame()
+        self.buton_2 = tk.Frame()
+
+        self.titre_text =tk.Label(master=self.titre, text="Informations sur les passagers")
+        self.titre_text.pack()
+    
+    def affiche(self):
+        self.form_passager()
         self.entete.pack()
         self.titre.pack()
         self.tableau.pack()
@@ -330,32 +429,71 @@ class Presentation_Etape():
     def cache(self):
         for widget in self.tableau.winfo_children():
             widget.destroy()
+        self.grand_buton_ajout.destroy()
         self.entete.pack_forget()
         self.titre.pack_forget()
         self.tableau.pack_forget()
         self.buton.pack_forget()
-    
-    def lire_etape(self, idcircuit):
-        #les listes
-        message = "Circuit " + str(idcircuit) + " :"
-        self.circuit_titre = tk.Label(master=self.tableau, text=message)
-        self.circuit_titre.grid(row=0,column=0)
+        self.buton_2.pack_forget()
+        
 
-        self.ordre_list = []
-        self.nom_list = []
-        self.ville_list = []
-        self.pays_list = []
-        self.descriptif_list = []
+    def form_passager(self):
+        self.grand_buton_ajout = tk.Button(master=self.buton, text= "Ajouter", command= lambda: self.verification())
+        self.grand_buton_ajout.pack()
+        #listes
+        self.nombre_liste = []
+        self.nom_liste = []
+        self.prenom_liste = []
         self.date_list = []
-        self.duree_list =[]
-        #sql
-        base = connexion.cursor()
-        ligne_nb = 1
-        base.execute("select Order, DateEtape, Duree, Descriptif, Etape.NomLieu, Etape.Ville, Etape.Pays from Etape, Lieu on where IdCircuit = ? and Etape.NomLieu = Lieu.NomLieu and Etape.Ville = Lieu.Ville and Etape.Pays = Lieu.Pays;",[idcircuit])
-        for ligne_base in base:
-            attendre = 1
+        self.frame_list = []
+        #affichage
+        global liste_informations
+        for ligne in range(liste_informations[3]):
+            #créer un frame
+            
+            message = "Passager " + str(ligne + 1)
+            titre = tk.Label(master=self.tableau, text=message)
+            titre.grid(row=ligne , column = 0)
 
+            self.frame_list.append(tk.Frame(master=self.tableau))
+            self.frame_list[ligne].grid(row = ligne, column = 1)
 
+            nom = tk.Label(master=self.frame_list[ligne], text="Nom :")
+            nom.grid(row= 0, column =0)
+
+            self.nom_liste.append(tk.Entry(master=self.frame_list[ligne]))
+            self.nom_liste[ligne].grid(row= 0, column =1)
+
+            prenom = tk.Label(master=self.frame_list[ligne], text="Prenom :")
+            prenom.grid(row= 1, column =0)
+
+            self.prenom_liste.append(tk.Entry(master=self.frame_list[ligne]))
+            self.prenom_liste[ligne].grid(row= 1, column =1)
+
+            date = tk.Label(master=self.frame_list[ligne], text="Date de Naissance :")
+            date.grid(row= 2, column =0)
+
+            self.date_list.append(tk.Entry(master=self.frame_list[ligne]))
+            self.date_list[ligne].grid(row= 2, column =1)
+
+    def verification(self):
+        Error = False
+        for ligne in range(len(self.frame_list)) :
+            if input_test_text(self.nom_liste[ligne].get(),24):
+                Error =  True
+            if input_test_text(self.prenom_liste[ligne].get(),24):
+                Error =  True
+            if input_test_date(self.date_list[ligne].get()):
+                Error =  True
+            
+        if not Error:
+            global IdReservation
+            for ligne in range(len(self.frame_list)) :
+                IdPassager = identification_passager(self.nom_liste[ligne].get(), self.prenom_liste[ligne].get(), self.date_list[ligne].get())
+                ajout_groupe(IdPassager, IdReservation)
+                connexion.commit()
+                self.buton.pack_forget()
+                self.buton_2.pack()
 
 class Liste_Admin():
     def __init__(self):
@@ -503,13 +641,13 @@ class Liste_Admin():
         #input_test_mail
         #input_test_date
         Error = False
-        if not input_test_text(self.nom_modif.get(), 24):
+        if input_test_text(self.nom_modif.get(), 24):
             Error= True
-        if not input_test_text(self.prenom_modif.get(), 24):
+        if input_test_text(self.prenom_modif.get(), 24):
             Error= True
-        if not input_test_text(self.user_modif.get(), 50):
+        if input_test_text(self.user_modif.get(), 50):
             Error= True
-        if not input_test_text(self.pwd_modif.get(), 50):
+        if input_test_text(self.pwd_modif.get(), 50):
             Error= True
         if not input_test_date(self.date_modif.get()):
             Error= True
@@ -567,13 +705,13 @@ class Liste_Admin():
 
     def Ajout_action(self):
         Error = False
-        if not input_test_text(self.nom_ajout.get(), 24):
+        if input_test_text(self.nom_ajout.get(), 24):
             Error= True
-        if not input_test_text(self.prenom_ajout.get(), 24):
+        if input_test_text(self.prenom_ajout.get(), 24):
             Error= True
-        if not input_test_text(self.user_ajout.get(), 50):
+        if input_test_text(self.user_ajout.get(), 50):
             Error= True
-        if not input_test_text(self.pwd_ajout.get(), 50):
+        if input_test_text(self.pwd_ajout.get(), 50):
             Error= True
         if not input_test_date(self.date_ajout.get()):
             Error= True
@@ -719,13 +857,13 @@ class Liste_Lieux():
 
     def modifier_enregistre(self, ligne_nb):
         Error = False
-        if not input_test_text(self.nom_modif.get(), 24):
+        if input_test_text(self.nom_modif.get(), 24):
             Error= True
-        if not input_test_text(self.ville_modif.get(), 24):
+        if input_test_text(self.ville_modif.get(), 24):
             Error= True
-        if not input_test_text(self.pays_modif.get(), 24):
+        if input_test_text(self.pays_modif.get(), 24):
             Error= True
-        if not input_test_text(self.descriptifs_modif.get(), 250):
+        if input_test_text(self.descriptifs_modif.get(), 250):
             Error= True
         try :
             float(self.prix_modif.get())
@@ -777,13 +915,13 @@ class Liste_Lieux():
     
     def Ajout_action(self):
         Error = False
-        if not input_test_text(self.nom_ajout.get(), 24):
+        if input_test_text(self.nom_ajout.get(), 24):
             Error= True
-        if not input_test_text(self.ville_ajout.get(), 24):
+        if input_test_text(self.ville_ajout.get(), 24):
             Error= True
-        if not input_test_text(self.pays_ajout.get(), 24):
+        if input_test_text(self.pays_ajout.get(), 24):
             Error= True
-        if not input_test_text(self.descriptifs_ajout.get(), 250):
+        if input_test_text(self.descriptifs_ajout.get(), 250):
             Error= True
         try :
             float(self.prix_ajout.get())
@@ -1170,9 +1308,9 @@ class Liste_Client():
 
     def modifier_enregistre(self, ligne):
         Error = False
-        if not input_test_text(self.nom_modif.get(), 24):
+        if input_test_text(self.nom_modif.get(), 24):
             Error= True
-        if not input_test_text(self.prenom_modif.get(), 24):
+        if input_test_text(self.prenom_modif.get(), 24):
             Error= True
         if not input_test_date(self.date_modif.get()):
             Error= True
@@ -1356,15 +1494,15 @@ class Liste_Circuit():
 
     def Ajout_action(self):
         Error = False
-        if not input_test_text(self.descriptif_ajout.get(), 200):
+        if input_test_text(self.descriptif_ajout.get(), 200):
             Error= True
-        if not input_test_text(self.ville_depart_ajout.get(), 24):
+        if input_test_text(self.ville_depart_ajout.get(), 24):
             Error= True
-        if not input_test_text(self.ville_arrivee_ajout.get(), 24):
+        if input_test_text(self.ville_arrivee_ajout.get(), 24):
             Error= True
-        if not input_test_text(self.pays_depart_ajout.get(), 24):
+        if input_test_text(self.pays_depart_ajout.get(), 24):
             Error= True
-        if not input_test_text(self.pays_arrivee_ajout.get(), 24):
+        if input_test_text(self.pays_arrivee_ajout.get(), 24):
             Error= True
         if not input_test_date(self.date_ajout.get()):
             Error= True
@@ -1448,15 +1586,15 @@ class Liste_Circuit():
 
     def modifier_enregistre(self, ligne):
         Error = False
-        if not input_test_text(self.descriptif_modif.get(), 200):
+        if input_test_text(self.descriptif_modif.get(), 200):
             Error= True
-        if not input_test_text(self.ville_depart_modif.get(), 24):
+        if input_test_text(self.ville_depart_modif.get(), 24):
             Error= True
-        if not input_test_text(self.ville_arrivee_modif.get(), 24):
+        if input_test_text(self.ville_arrivee_modif.get(), 24):
             Error= True
-        if not input_test_text(self.pays_depart_modif.get(), 24):
+        if input_test_text(self.pays_depart_modif.get(), 24):
             Error= True
-        if not input_test_text(self.pays_arrivee_modif.get(), 24):
+        if input_test_text(self.pays_arrivee_modif.get(), 24):
             Error= True
         if not input_test_date(self.date_modif.get()):
             Error= True
