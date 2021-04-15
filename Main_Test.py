@@ -195,7 +195,7 @@ def ajout_groupe(Idpassager, Idreservation): #testé
 
 def confirmer_groupe(Idpassager, Idreservation): #testé
     base = connexion.cursor()
-    base.execute("update Groupe set Confirmation = 1 where IdPersonne = ? and IdReservation = ?;",[Idpassager, Idreservation])
+    base.execute("update Groupe set Confirmation = 1 where IdPersonne = ? and IdReservation = ? and DateAnnulation = NULL;",[Idpassager, Idreservation])
     base.close()
 
 def annuler_groupe(Idpassager, Idreservation, date): #testé - testé

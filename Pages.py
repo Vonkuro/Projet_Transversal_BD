@@ -495,6 +495,172 @@ class Reservation_passager():
                 self.buton.pack_forget()
                 self.buton_2.pack()
 
+class Presentation_Reservation():
+    def __init__(self):
+        self.entete = tk.Frame()
+        self.titre = tk.Frame()
+        self.buton = tk.Frame()
+        self.tableau = tk.Frame()
+        
+        self.titre_text = tk.Label(master=self.titre, text="Vos Reservations")
+        self.titre_text.pack()
+
+    def affiche(self):
+        self.les_liste()
+        self.lire_reserv()
+        self.entete.pack()
+        self.titre.pack()
+        global IdReservation
+        IdReservation = 0
+        self.tableau.pack()
+
+    def cache(self):
+        for widget in self.tableau.winfo_children():
+            widget.destroy()
+        self.entete.pack_forget()
+        self.titre.pack_forget()
+        self.buton.pack_forget()
+        self.tableau.pack_forget()
+    
+    def les_liste(self):
+        #On crée une liste par colone du tableau, les listes vont contenir les Labels à affichés
+        self.Id_list = []
+        self.Id_list.append(tk.Label(master=self.tableau, text="Numero du circuit"))
+        self.Id_list[0].grid(row=0,column=0)
+        
+        self.description_list = []
+        self.description_list.append(tk.Label(master=self.tableau, text="Description du circuit"))
+        self.description_list[0].grid(row=0,column=1)
+
+        self.date_list = []
+        self.date_list.append(tk.Label(master=self.tableau, text="Date de Départ"))
+        self.date_list[0].grid(row=0,column=2)
+
+        self.nombre_list = []
+        self.nombre_list.append(tk.Label(master=self.tableau, text="Nombre de Passagers"))
+        self.nombre_list[0].grid(row=0,column=3)
+
+        self.detail_list = []
+        self.detail_list.append(tk.Label(master=self.tableau, text="Selectionner"))
+        self.detail_list[0].grid(row=0,column=4)
+
+        self.reserv_list =[]
+        self.reserv_list.append(0)
+
+    def lire_reserv(self):
+        global IdPersonne
+        base = connexion.cursor()
+        base.execute("Select Circuit.IdCircuit, Descriptif, DateDepart, Place, IdReservation from Reservation, Circuit where Circuit.IdCircuit = Reservation.IdCircuit and IdPersonne = ?;", [IdPersonne])
+        ligne = 1
+        for ligne_base in base:
+            self.Id_list.append(tk.Label(master=self.tableau, text=ligne_base.IdCircuit))
+            self.Id_list[ligne].grid(row=ligne,column=0)
+
+            self.description_list.append(tk.Label(master=self.tableau, text=ligne_base.Descriptif))
+            self.description_list[ligne].grid(row=ligne,column=1)
+
+            self.date_list.append(tk.Label(master=self.tableau, text=ligne_base.DateDepart))
+            self.date_list[ligne].grid(row=ligne,column=2)
+
+            self.nombre_list.append(tk.Label(master=self.tableau, text=ligne_base.Place))
+            self.nombre_list[ligne].grid(row=ligne,column=3)
+
+            self.detail_list.append(tk.Button(master=self.tableau, text="Selection", command= lambda var_ligne = ligne : self.Choix(var_ligne)))
+            self.detail_list[ligne].grid(row=ligne,column=4)
+
+            self.reserv_list.append(ligne_base.IdReservation)
+            ligne += 1
+        base.close()
+    
+    def Choix(self, ligne):
+        global IdReservation
+        IdReservation = self.reserv_list[ligne]
+        for i in range(1,len(self.detail_list)):
+            self.detail_list[i].configure(relief='raised')
+        self.detail_list[ligne].configure(relief='sunken')
+        self.buton.pack_forget()
+        self.buton.pack()
+
+class Presentation_Passager():
+    def __init__(self):
+        self.entete = tk.Frame()
+        self.titre = tk.Frame()
+        self.buton = tk.Frame()
+        self.tableau = tk.Frame()
+        
+        self.titre_text = tk.Label(master=self.titre, text="Détail de la Reservation")
+        self.titre_text.pack()
+
+    def affiche(self):
+        self.les_liste()
+        self.lire_passager()
+        self.entete.pack()
+        self.titre.pack()
+        self.tableau.pack()
+        self.buton.pack()
+
+    def les_liste(self):
+        self.titre_1 = tk.Label(master=self.tableau, text="Circuit")
+        self.titre_1.grid(row=0, column=0)
+
+        self.titre_2 = tk.Label(master=self.tableau, text="Passagers")
+        self.titre_2.grid(row=0, column=1)
+
+        self.frame_1 = tk.Frame(master=self.tableau)
+        self.frame_1.grid(row=1, column=0)
+        self.frame_2 = tk.Frame(master=self.tableau)
+        self.frame_2.grid(row=1, column=1)
+
+        self.nom_list= []
+        self.prenom_list= []
+        self.confirm_list = []
+        self.annuler_list = []
+        self.Id_list = []
+
+    def lire_passager(self):
+        global IdReservation
+        base =connexion.cursor()
+        base.execute("Select Descriptif, VilleDepart, VilleArrivee, DateDepart, Duree, PaysDepart, PaysArrivee from Circuit inner join Reservation on Circuit.IdCircuit = Reservation.IdCircuit where IdReservation = ?;",[IdReservation])
+        ligne_base = base.fetchone()
+
+        message = ligne_base.Descriptif + " depuis " + ligne_base.VilleDepart + " en " + ligne_base.PaysDepart
+        message += " jusqu'à " + ligne_base.VilleArrivee + " en " + ligne_base.PaysArrivee + "."
+        message += " Le cicruit commence le " + ligne_base.DateDepart
+        message += " et durera " + str(ligne_base.Duree) + " jours."
+        circuit = tk.Label(master=self.frame_1, text=message)
+        circuit.pack()
+        
+        base.execute("select Nom, Prenom, Personne.IdPersonne from Groupe inner join Personne on Groupe.IdPersonne = Personne.IdPersonne where IdReservation = ?;",[IdReservation])
+        ligne = 0
+        for ligne_base in base:
+            self.nom_list.append(tk.Label(master=self.frame_2, text=ligne_base.Nom))
+            self.nom_list[ligne].grid(row=ligne, column =0)
+
+            self.prenom_list.append(tk.Label(master=self.frame_2, text=ligne_base.Prenom))
+            self.prenom_list[ligne].grid(row=ligne, column =1)
+
+            self.confirm_list.append(tk.Button(master=self.frame_2, text="Confirmer", command = lambda var_ligne = ligne : self.confirmation(var_ligne)))
+            self.confirm_list[ligne].grid(row=ligne, column =2)
+
+            self.annuler_list.append(tk.Button(master=self.frame_2, text="Annuler", command = lambda var_ligne = ligne : self.annulation(var_ligne)))
+            self.annuler_list[ligne].grid(row=ligne, column =3)
+
+            self.Id_list.append(ligne_base.IdPersonne)
+            ligne +=1
+        base.close()
+    
+    def confirmation(self, ligne):
+        global IdReservation
+        confirmer_groupe(self.Id_list[ligne], IdReservation)
+        connexion.commit()
+    
+    def annulation(self,ligne):
+        global IdReservation
+        jour = datetime.today()
+        jour_string = jour.strftime("%Y-%m-%d")
+        annuler_groupe(self.Id_list[ligne], IdReservation, jour_string)
+        connexion.commit()
+
 class Liste_Admin():
     def __init__(self):
         self.entete = tk.Frame()
@@ -1725,6 +1891,7 @@ class Liste_Passager():
         connexion.commit()
         self.cache()
         self.affiche()
+
 """
     def Ajout_form(self, ligne):
         self.nom_ajout = tk.Entry(master=self.tableau)

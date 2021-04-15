@@ -53,6 +53,8 @@ def Application():
     Pres_Cir = Presentation_Circuit()
     Pres_Et = Presentation_Etape()
     Res_Pa = Reservation_passager()
+    Pres_Re = Presentation_Reservation()
+    Pres_Pa = Presentation_Passager()
     
     #initialisation des boutons d'interaction entre les pages
     #butons Logins
@@ -102,7 +104,9 @@ def Application():
     accueil_client_logout = tk.Button(master=Accueil_Cl.entete, text="log out", command= lambda: Log_Out(Login_page, Accueil_Cl))
     accueil_client_logout.pack()
     chercher_circuit = tk.Button(master=Accueil_Cl.buton, text="Voir les circuits disponibles", command= lambda: changement_vers_Pres_circuit(Accueil_Cl, Pres_Cir))
-    chercher_circuit.pack()
+    chercher_circuit.grid(row=0, column=0)
+    reservation_a_c = tk.Button(master=Accueil_Cl.buton, text="Voir mes reservations", command= lambda: changement_page(Accueil_Cl, Pres_Re))
+    reservation_a_c.grid(row=0, column=1)
     #butons Présentation des Circuits
     retour_pc = tk.Button(master=Pres_Cir.entete, text="Retour à l'Accueil", command= lambda: changement_page(Pres_Cir, Accueil_Cl))
     retour_pc.pack()
@@ -116,6 +120,16 @@ def Application():
     #butons Reservation des passagers
     retour_rp = tk.Button(master=Res_Pa.buton_2, text="Retour à l'Accueil'", command= lambda: changement_page(Res_Pa, Accueil_Cl))
     retour_rp.pack()
+    #butons Présention des reservations
+    retour_pr = tk.Button(master=Pres_Re.entete, text="Retour à l'Accueil", command= lambda: changement_page(Pres_Re, Accueil_Cl))
+    retour_pr.pack()
+    details_pr =tk.Button(master=Pres_Re.buton, text="Details", command= lambda: changement_page(Pres_Re, Pres_Pa))
+    details_pr.pack()
+    #butons Présention des passagers
+    retour_pp = tk.Button(master=Pres_Pa.entete, text="Retour à l'Accueil", command= lambda: changement_page(Pres_Pa, Accueil_Cl))
+    retour_pp.pack()
+    reserv_pp = tk.Button(master=Pres_Pa.buton, text="Retour aux reservations", command= lambda: changement_page(Pres_Pa, Accueil_Cl))
+    reserv_pp.pack()
     #Fonctionnement
     Login_page.affiche()
     #Accueil_Cl.affiche()
