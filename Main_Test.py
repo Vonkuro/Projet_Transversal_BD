@@ -195,18 +195,21 @@ def ajout_groupe(Idpassager, Idreservation): #testé
 
 def confirmer_groupe(Idpassager, Idreservation): #testé
     base = connexion.cursor()
-    base.execute("update Groupe set Confirmation = 1 where IdPersonne = ? and IdReservation = ? and DateAnnulation = NULL;",[Idpassager, Idreservation])
+    base.execute("update Groupe set Confirmation = 1 where IdPersonne = ? and IdReservation = ? and DateAnnulation is NULL;",[Idpassager, Idreservation])
     base.close()
 
 def annuler_groupe(Idpassager, Idreservation, date): #testé - testé
     base = connexion.cursor() # a améliorer : circuit regagne une place et reservation en perd une - fait
-    base.execute("update Groupe set Confirmation = 0, DateAnnulation = ? where IdPersonne = ? and IdReservation = ?;",[date, Idpassager, Idreservation])
-    #uptade circuit via clé reservation puis clé circuit
-    base.execute("select top 1 Circuit.IdCircuit, Circuit.NbPlaceDisponible, Reservation.Place from Reservation inner join Circuit on Reservation.IdCircuit = Circuit.IdCircuit where IdReservation = ?",[Idreservation])
-    circuit = base.fetchone()
-    base.execute("update Circuit set NbPlaceDisponible = ? where IdCircuit = ?;", [circuit.NbPlaceDisponible + 1 , circuit.IdCircuit]) #ici
-    #uptade reservation via clé reservation
-    base.execute("update Reservation set Place = ? where IdReservation = ?;", [circuit.Place - 1, Idreservation])
+    base.execute("select DateAnnulation from Groupe where IdPersonne = ? and IdReservation = ?;",[Idpassager, Idreservation])
+    verification = base.fetchone()
+    if verification.DateAnnulation == None:
+        base.execute("update Groupe set Confirmation = 0, DateAnnulation = ? where IdPersonne = ? and IdReservation = ?;",[date, Idpassager, Idreservation])
+        #uptade circuit via clé reservation puis clé circuit
+        base.execute("select top 1 Circuit.IdCircuit, Circuit.NbPlaceDisponible, Reservation.Place from Reservation inner join Circuit on Reservation.IdCircuit = Circuit.IdCircuit where IdReservation = ?",[Idreservation])
+        circuit = base.fetchone()
+        base.execute("update Circuit set NbPlaceDisponible = ? where IdCircuit = ?;", [circuit.NbPlaceDisponible + 1 , circuit.IdCircuit]) #ici
+        #uptade reservation via clé reservation
+        base.execute("update Reservation set Place = ? where IdReservation = ?;", [circuit.Place - 1, Idreservation])
     base.close()
 
 def miseajour_reservation(): #testé

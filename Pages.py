@@ -599,6 +599,15 @@ class Presentation_Passager():
         self.tableau.pack()
         self.buton.pack()
 
+    def cache(self):
+        for widget in self.tableau.winfo_children():
+            widget.destroy()
+        self.entete.pack_forget()
+        self.titre.pack_forget()
+        self.buton.pack_forget()
+        self.tableau.pack_forget()
+        
+
     def les_liste(self):
         self.titre_1 = tk.Label(master=self.tableau, text="Circuit")
         self.titre_1.grid(row=0, column=0)
